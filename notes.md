@@ -1,2 +1,1 @@
-# Loss Functions
-- BCE Performed worse than MSE
+- Able to remove bottom 
