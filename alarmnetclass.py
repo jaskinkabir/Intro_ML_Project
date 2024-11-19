@@ -18,8 +18,10 @@ class AlarmNet(nn.Module):
         }
         for key, value in comparisons.items():
             print(f'{key}: {value} %')
-    def __init__(self, num_features, activation=nn.ReLU, hidden_layers = [64, 32, 16],):
-        super(AlarmNet, self).__init__()
+    def __init__(self, num_features=0, activation=nn.ReLU, hidden_layers = [64, 32, 16], pass_through=False):
+        super().__init__()
+        if pass_through:
+            return
         self.stack_list = [nn.Linear(num_features, hidden_layers[0]), activation()]
         for i in range(1, len(hidden_layers)):
             self.stack_list.extend([nn.Linear(hidden_layers[i-1], hidden_layers[i]), activation()])  # Use extend instead of assignment
@@ -30,7 +32,7 @@ class AlarmNet(nn.Module):
         return self.stack(x)
     def predict(self, x):
         return self.forward(x).round()
-    def train(self, epochs, X_train, X_test, Y_train, Y_test, alpha, loss_fn=nn.BCELoss()):
+    def train(self, epochs, X_train, X_test, Y_train, Y_test, alpha, loss_fn=nn.BCELoss(), print_epoch=500):
         optimizer = torch.optim.Adam(self.parameters(), lr=alpha)
 
         for epoch in range(epochs):
@@ -39,7 +41,7 @@ class AlarmNet(nn.Module):
             loss = loss_fn(Y_pred, Y_train)
             loss.backward()
             optimizer.step()
-            if epoch % 500 == 0:
+            if epoch % print_epoch == 0:
                 print(f'Epoch {epoch} Loss: {loss.item()}')
         Y_pred = self.predict(X_test)
         self.last_pred = Y_pred
@@ -97,3 +99,6 @@ class ConstantPredictor(AlarmNet):
         }
     def print_results(self):
         super().print_results(self.get_results())
+        
+        
+        
