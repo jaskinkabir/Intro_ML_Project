@@ -32,8 +32,8 @@ class AlarmNet(nn.Module):
         return self.stack(x)
     def predict(self, x):
         return self.forward(x).round()
-    def train(self, epochs, X_train, X_test, Y_train, Y_test, alpha, loss_fn=nn.BCELoss(), print_epoch=500):
-        optimizer = torch.optim.Adam(self.parameters(), lr=alpha)
+    def train(self, epochs, X_train, X_test, Y_train, Y_test, alpha, loss_fn=nn.BCELoss(), print_epoch=500, optimizer=torch.optim.Adam):
+        optimizer = optimizer(self.parameters(), lr=alpha)
 
         for epoch in range(epochs):
             optimizer.zero_grad()
