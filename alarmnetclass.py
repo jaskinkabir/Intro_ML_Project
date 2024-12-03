@@ -33,9 +33,9 @@ class AlarmNet(nn.Module):
         return self.forward(x).round()
     def train(self, epochs, X_train, X_test, Y_train, Y_test, alpha, loss_fn=nn.BCELoss(), print_epoch=500, optimizer=torch.optim.Adam):
         if print_epoch:
-            print("-"*40)
-            print(f"| {'Epoch':5} | {'Training Loss':5} | {' Test Loss  ':5} |")
-            print("-"*40)
+            print("-"*55)
+            print(f"| {'Epoch':5} | {'Training Loss':5} | {' Test Loss  ':5} |    Recall    |")
+            print("-"*55)
         train_hist = np.zeros(epochs)
         test_hist = np.zeros(epochs)
         optimizer = optimizer(self.parameters(), lr=alpha)
@@ -51,8 +51,9 @@ class AlarmNet(nn.Module):
             test_hist[epoch] = test_loss
             if epoch % print_epoch == 0 or epoch == epochs-1:
                 # Center values between pipes so that the printed output looks like a table
-                print(f"| {epoch:5} | {loss.item():13.10f} | {test_loss:10.10f} |")
-                print("-"*40)
+                recall = recall_score(Y_test.cpu().detach().numpy(), self.predict(X_test).cpu().detach().numpy())
+                print(f"| {epoch:5} | {loss.item():13.10f} | {test_loss:10.10f} | {recall:5.10f} |")
+                print("-"*55)
             train_hist[epoch] = loss.item()
 
         Y_pred = self.predict(X_test)
@@ -86,7 +87,7 @@ class AlarmNet(nn.Module):
             except:
                 results = self.get_results()
         for key, value in results.items():
-            if key != 'confusion_matrix':
+            if key not in ['confusion_matrix', 'classification_report']:
                 print(f'{key.capitalize()}: {value}')
             else:
                 print(f'{key.capitalize()}:\n{value}')
