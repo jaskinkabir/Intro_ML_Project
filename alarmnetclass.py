@@ -1,8 +1,11 @@
 import torch
 from torch import nn
 import numpy as np
-from sklearn.metrics import accuracy_score, precision_score, recall_score, f1_score, confusion_matrix, classification_report
+from sklearn.metrics import accuracy_score, precision_score, recall_score, f1_score, confusion_matrix, classification_report, ConfusionMatrixDisplay
+
 import matplotlib.pyplot as plt
+
+#import confusion matrix plotter
 
 class AlarmNet(nn.Module):
 
@@ -103,6 +106,16 @@ class AlarmNet(nn.Module):
         plt.ylabel('Loss')
         plt.title(title)
         plt.legend()
+        plt.show()
+    def plot_confusion_matrix(self, title, color = 'Reds'):
+        cm = self.last_results['confusion_matrix']
+        disp = ConfusionMatrixDisplay(
+            confusion_matrix=cm,
+            display_labels=['No Fire', 'Fire'],
+            color_map=color
+        )
+        disp.plot()
+        plt.title(title)
         plt.show()
         
 class ConstantPredictor(AlarmNet):
