@@ -109,14 +109,15 @@ class AlarmNet(nn.Module):
         plt.show()
     def plot_confusion_matrix(self, title, color = 'Reds'):
         cm = self.last_results['confusion_matrix']
-        disp = ConfusionMatrixDisplay(
-            confusion_matrix=cm,
-            display_labels=['No Fire', 'Fire'],
-            color_map=color
+        
+        disp = ConfusionMatrixDisplay.from_predictions(
+            y_pred = self.last_pred.cpu().detach().numpy().round().astype(int),
+            y_true = self.last_test.cpu().detach().numpy(),
+            display_labels=["No Fire", "Fire"],
+            cmap = color
         )
-        disp.plot()
         plt.title(title)
-        plt.show()
+        
         
 class ConstantPredictor(AlarmNet):
     def __init__(self, val):
