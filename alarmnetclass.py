@@ -4,6 +4,8 @@ import torch.nn.functional as F
 import numpy as np
 from sklearn.metrics import accuracy_score, precision_score, recall_score, f1_score, confusion_matrix, classification_report, ConfusionMatrixDisplay
 from torch.amp import autocast, GradScaler
+#import svm 
+from sklearn.svm import SVC
 
 import matplotlib.pyplot as plt
 import time
@@ -232,4 +234,37 @@ class ConstantPredictor(AlarmNet):
         super().print_results(self.get_results())
         
         
+class SVMAlarmNet(AlarmNet):
+    def __init__(self, kernel='rbf', C=1.0, degree=3, gamma='scale', coef0=0.0, shrinking=True, probability=False, tol=1e-3, cache_size=200, class_weight=None):
+        super().__init__(pass_through=True)
+        self.model = SVC(kernel=kernel, C=C, degree=degree, gamma=gamma, coef0=coef0, shrinking=shrinking, probability=probability, tol=tol, cache_size=cache_size, class_weight=class_weight)
+    def train(self, X_train, X_test, Y_train, Y_test, *args, **kwargs):
+        self.model.fit(X_train.cpu().detach().numpy(), Y_train.cpu().detach().numpy())
+        self.last_test = Y_test
+        self.last_pred = torch.tensor(self.model.predict(X_test.cpu().detach().numpy())).reshape(-1, 1).float()
+    def get_results(self):
+        self.last_results = {
+            'accuracy': accuracy_score(self.last_test.cpu().detach().numpy(), self.last_pred.cpu().detach().numpy()),
+            'precision': precision_score(self.last_test.cpu().detach().numpy(), self.last_pred.cpu().detach().numpy()),
+            'recall': recall_score(self.last_test.cpu().detach().numpy(), self.last_pred.cpu().detach().numpy()),
+            'f1': f1_score(self.last_test.cpu().detach().numpy(), self.last_pred.cpu().detach().numpy()),
+            'confusion_matrix': confusion_matrix(self.last_test.cpu().detach().numpy(), self.last_pred.cpu().detach().numpy()),
+            'classification_report': classification_report(self.last_test.cpu().detach().numpy(), self.last_pred.cpu().detach().numpy())
+        }
+        return self.last_results
+    def print_results(self):
+        super().print_results(self.get_results())
+    def predict(self, x):
+        return torch.tensor(self.model.predict(x.cpu().detach().numpy())).reshape(-1, 1).float()
+    def plot_confusion_matrix(self, title, color = 'Reds'):
+        cm = self.last_results['confusion_matrix']
         
+        disp = ConfusionMatrixDisplay(
+            confusion_matrix = cm,
+            display_labels=["No Fire", "Fire"],
+            cmap = color
+        )
+        plt.title(title)
+        disp.plot()
+        plt.show()
+    
