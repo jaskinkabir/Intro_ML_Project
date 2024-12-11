@@ -134,7 +134,7 @@ class AlarmNet(nn.Module):
                 epoch_duration = end_epoch - begin_epoch
                 overfit = 100 * (test_loss - train_loss) / train_loss
                 d_accuracy = torch.zeros(1) if max_recall == 0 else 100 * (recall - max_recall) / max_recall
-                if recall > max_recall:
+                if recall > max_recall and epoch > 0:
                     max_recall = recall
                 
                 epoch_inspection['Epoch'] = f'{epoch}'
