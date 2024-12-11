@@ -1,7 +1,7 @@
 import matplotlib.pyplot as plt
 import matplotlib
 import numpy as np
-from sklearn.metrics import recall_score
+from sklearn.metrics import recall_score, classification_report, accuracy_score
 
 np.random.seed(0)
 
@@ -26,3 +26,5 @@ print(acc, accuracy_err)
 
 print(recall_score(true, pred))
 print(recall_score(true, pred_err))
+print(accuracy_score(true, pred_err))
+print(classification_report(true, pred_err))
