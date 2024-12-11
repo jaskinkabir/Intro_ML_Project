@@ -1,37 +1,28 @@
-import torch
-import torch.nn as nn
+import matplotlib.pyplot as plt
+import matplotlib
+import numpy as np
+from sklearn.metrics import recall_score
 
+np.random.seed(0)
 
-class AlexNet(nn.Module):
+true = np.random.rand(5000).round()
+acc=0.875
+error_chance = 0.2
+pred_mask = np.random.rand(5000) < acc
+error_mask = np.random.rand(5000) < error_chance
+print(sum(true))
+print(sum(pred_mask)/5000)
+pred = true == pred_mask
+print(sum(pred))
 
-    def __init__(self, num_classes: int = 1000) -> None:
-        super(AlexNet, self).__init__()
-        self.features = nn.Sequential(
-            nn.Conv2d(3, 64, kernel_size=11, stride=4, padding=2),
-            nn.ReLU(inplace=True),
-            nn.MaxPool2d(kernel_size=3, stride=2),
-            nn.Conv2d(64, 192, kernel_size=5, padding=2),
-            nn.ReLU(inplace=True),
-            nn.MaxPool2d(kernel_size=3, stride=2),
-            nn.Conv2d(192, 384, kernel_size=3, padding=1),
-            nn.ReLU(inplace=True),
-            nn.Conv2d(384, 256, kernel_size=3, padding=1),
-            nn.ReLU(inplace=True),
-            nn.Conv2d(256, 256, kernel_size=3, padding=1),
-            nn.ReLU(inplace=True),
-            nn.MaxPool2d(kernel_size=3, stride=2),
-        )
-        self.avgpool = nn.AdaptiveAvgPool2d((6, 6))
-        self.classifier = nn.Sequential(
-            nn.Dropout(),
-            nn.Linear(256 * 6 * 6, 4096),
-            nn.ReLU(inplace=True),
-            nn.Dropout(),
-            nn.Linear(4096, 4096),
-            nn.ReLU(inplace=True),
-            nn.Linear(4096, num_classes),
-        )
-        
-alex = AlexNet()
-model_size = sum(p.numel() for p in alex.parameters())
-print(f"{model_size} ")
+accuracy = np.mean(pred == true)  
+print(accuracy)
+
+pred_err = pred.copy()
+pred_err = pred_err & ~error_mask
+
+accuracy_err = np.mean(pred_err == true)
+print(acc, accuracy_err)
+
+print(recall_score(true, pred))
+print(recall_score(true, pred_err))
