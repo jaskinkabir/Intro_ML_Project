@@ -80,25 +80,5 @@ class AlarmNetNoCuda(nn.Module):
     def train_and_print(self, epochs, X_train, X_test, Y_train, Y_test, alpha):
         Y_pred = self.train(epochs, X_train, X_test, Y_train, Y_test, alpha).cpu().detach().numpy().round().astype(int)
         self.print_results(Y_test, Y_pred)
-        
-class ConstantPredictor(AlarmNet):
-    def __init__(self, val):
-        self.val = val
-    def predict(self, x):
-        return torch.tensor([self.val]*x.shape[0]).reshape(-1, 1).float()
-    def train(self, *args, **kwargs):
-        pass
-    def get_results(self):
-        return {
-            'accuracy': None,
-            'precision': None,
-            'recall': None,
-            'f1': None,
-            'confusion_matrix': None,
-            'classification_report': None
-        }
-    def print_results(self):
-        super().print_results(self.get_results())
-        
-        
+
         
