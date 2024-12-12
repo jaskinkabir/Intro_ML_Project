@@ -2,8 +2,12 @@ import torch
 from torch import nn
 import torch.nn.functional as F
 import numpy as np
-from sklearn.metrics import accuracy_score, precision_score, recall_score, f1_score, confusion_matrix, classification_report
-from torch.cuda.amp import GradScaler, autocast
+from sklearn.metrics import accuracy_score, precision_score, recall_score, f1_score, confusion_matrix, classification_report, ConfusionMatrixDisplay
+from torch.amp import autocast, GradScaler
+#import svm 
+from sklearn.svm import SVC
+
+import matplotlib.pyplot as plt
 import time
 
 
@@ -193,6 +197,104 @@ class AlarmNet(nn.Module):
 class ConstantPredictor(AlarmNet):
     def __init__(self, val):
         self.val = val
+    def predict(self, x):
+        return self.forward(x).round()
+    def train(self, epochs, X_train, X_test, Y_train, Y_test, alpha, loss_fn=nn.BCELoss(), print_epoch=500, optimizer=torch.optim.Adam):
+        optimizer = optimizer(self.parameters(), lr=alpha)
+
+        for epoch in range(epochs):
+            optimizer.zero_grad()
+            Y_pred = self.forward(X_train)
+            loss = loss_fn(Y_pred, Y_train)
+            loss.backward()
+            optimizer.step()
+            if epoch % print_epoch == 0:
+                print(f'Epoch {epoch} Loss: {loss.item()}')
+        Y_pred = self.predict(X_test)
+        self.last_pred = Y_pred
+        self.last_test = Y_test
+        return [Y_test,Y_pred]
+    
+    def get_results(self, Y_test=None, Y_pred=None):
+        if Y_test is None:
+            Y_test = self.last_test
+        if Y_pred is None:
+            Y_pred = self.last_pred
+        Y_test = Y_test.cpu().detach().numpy()
+        Y_pred = Y_pred.cpu().detach().numpy()
+        results = {
+            'accuracy': accuracy_score(Y_test, Y_pred),
+            'precision': precision_score(Y_test, Y_pred),
+            'recall': recall_score(Y_test, Y_pred),
+            'f1': f1_score(Y_test, Y_pred),
+            'confusion_matrix': confusion_matrix(Y_test, Y_pred),
+            'classification_report': classification_report(Y_test, Y_pred)
+        }
+    def print_results(self):
+        super().print_results(self.get_results())
+        
+        
+class SVMAlarmNet(AlarmNet):
+    def __init__(self, kernel='rbf', C=1.0, degree=3, gamma='scale', coef0=0.0, shrinking=True, probability=False, tol=1e-3, cache_size=200, class_weight=None):
+        super().__init__(pass_through=True)
+        self.model = SVC(kernel=kernel, C=C, degree=degree, gamma=gamma, coef0=coef0, shrinking=shrinking, probability=probability, tol=tol, cache_size=cache_size, class_weight=class_weight)
+    def train(self, 
+              X_train: np.ndarray,
+              X_test: np.ndarray,
+              Y_train: np.ndarray,
+              Y_test: np.ndarray,
+              *args,
+              **kwargs
+        ):
+        self.model.fit(X_train, Y_train)
+        self.last_test = Y_test
+        self.last_pred = self.model.predict(X_test).reshape(-1, 1)
+    def get_results(self):
+        self.last_results = {
+            'accuracy': accuracy_score(self.last_test, self.last_pred),
+            'precision': precision_score(self.last_test, self.last_pred),
+            'recall': recall_score(self.last_test, self.last_pred),
+            'f1': f1_score(self.last_test, self.last_pred),
+            'confusion_matrix': confusion_matrix(self.last_test, self.last_pred),
+            'classification_report': classification_report(self.last_test, self.last_pred)
+        }
+        return self.last_results
+    def predict(self, x):
+        return self.model.predict(x)
+    def plot_confusion_matrix(self, title, color='Reds'):
+        cm = self.last_results['confusion_matrix']
+        disp = ConfusionMatrixDisplay.from_predictions(
+            y_pred = self.last_pred,
+            y_true = self.last_test,
+            display_labels=["No Fire", "Fire"],
+            cmap = color
+        )
+        plt.title(title)
+class AlarmNetNoCuda(nn.Module):
+
+    @classmethod
+    def compare_results(cls, results1, results2):
+        print('Comparing results:')
+        comparisons = {
+            'accuracy': 100*(results1['accuracy'] - results2['accuracy'])/results1['accuracy'],
+            'precision': 100*(results1['precision'] - results2['precision'])/results1['precision'],
+            'recall': 100*(results1['recall'] - results2['recall'])/results1['recall'],
+            'f1': 100*(results1['f1'] - results2['f1'])/results1['f1']
+        }
+        for key, value in comparisons.items():
+            print(f'{key}: {value} %')
+    def __init__(self, num_features=0, activation=nn.ReLU, hidden_layers = [64, 32, 16], pass_through=False):
+        super().__init__()
+        if pass_through:
+            return
+        self.stack_list = [nn.Linear(num_features, hidden_layers[0]), activation()]
+        for i in range(1, len(hidden_layers)):
+            self.stack_list.extend([nn.Linear(hidden_layers[i-1], hidden_layers[i]), activation()])  # Use extend instead of assignment
+        
+        self.stack_list.extend([nn.Linear(hidden_layers[-1], 1), nn.Sigmoid()])  # Use extend instead of assignment
+        self.stack = nn.Sequential(*self.stack_list)
+    def forward(self, x):
+        return self.stack(x)
     def predict(self, x):
         return self.forward(x).round()
     def train(self, epochs, X_train, X_test, Y_train, Y_test, alpha, loss_fn=nn.BCELoss(), print_epoch=500, optimizer=torch.optim.Adam):
