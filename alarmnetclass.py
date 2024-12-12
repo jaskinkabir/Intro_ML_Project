@@ -2,8 +2,11 @@ import torch
 from torch import nn
 import torch.nn.functional as F
 import numpy as np
-from sklearn.metrics import accuracy_score, precision_score, recall_score, f1_score, confusion_matrix, classification_report, ConfusionMatrixDisplay
-from torch.amp import autocast, GradScaler
+from sklearn.metrics import accuracy_score, precision_score, recall_score, f1_score, confusion_matrix, classification_report
+from torch.cuda.amp import GradScaler, autocast
+import time
+
+
 
 class AlarmNet(nn.Module):
 
@@ -186,32 +189,10 @@ class AlarmNet(nn.Module):
     def train_and_print(self, epochs, X_train, X_test, Y_train, Y_test, alpha):
         Y_pred = self.train(epochs, X_train, X_test, Y_train, Y_test, alpha).cpu().detach().numpy().round().astype(int)
         self.print_results(Y_test, Y_pred)
-
-class AlarmNetNoCuda(nn.Module):
-
-    @classmethod
-    def compare_results(cls, results1, results2):
-        print('Comparing results:')
-        comparisons = {
-            'accuracy': 100*(results1['accuracy'] - results2['accuracy'])/results1['accuracy'],
-            'precision': 100*(results1['precision'] - results2['precision'])/results1['precision'],
-            'recall': 100*(results1['recall'] - results2['recall'])/results1['recall'],
-            'f1': 100*(results1['f1'] - results2['f1'])/results1['f1']
-        }
-        for key, value in comparisons.items():
-            print(f'{key}: {value} %')
-    def __init__(self, num_features=0, activation=nn.ReLU, hidden_layers = [64, 32, 16], pass_through=False):
-        super().__init__()
-        if pass_through:
-            return
-        self.stack_list = [nn.Linear(num_features, hidden_layers[0]), activation()]
-        for i in range(1, len(hidden_layers)):
-            self.stack_list.extend([nn.Linear(hidden_layers[i-1], hidden_layers[i]), activation()])  # Use extend instead of assignment
         
-        self.stack_list.extend([nn.Linear(hidden_layers[-1], 1), nn.Sigmoid()])  # Use extend instead of assignment
-        self.stack = nn.Sequential(*self.stack_list)
-    def forward(self, x):
-        return self.stack(x)
+class ConstantPredictor(AlarmNet):
+    def __init__(self, val):
+        self.val = val
     def predict(self, x):
         return self.forward(x).round()
     def train(self, epochs, X_train, X_test, Y_train, Y_test, alpha, loss_fn=nn.BCELoss(), print_epoch=500, optimizer=torch.optim.Adam):
