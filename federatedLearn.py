@@ -3,7 +3,7 @@ import seaborn as sns
 import matplotlib.pyplot as plt
 import pandas as pd
 import os
-from alarmnetclass import AlarmNet
+from alarmnetclass import AlarmNetNoCuda as AlarmNet
 from sklearn.metrics import classification_report, confusion_matrix
 
 class FederatedLearning:
@@ -28,6 +28,7 @@ class FederatedLearning:
             num_features=self.global_model.stack[0].in_features,
             hidden_layers=[32, 16, 8],
         )
+        
         local_model.load_state_dict(self.global_model.state_dict())  # Copy global weights
         optimizer = torch.optim.Adam(local_model.parameters(), lr=lr)
         loss_fn = torch.nn.BCELoss()
