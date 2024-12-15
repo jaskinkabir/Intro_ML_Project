@@ -245,9 +245,9 @@ These top four features were:
 While a sufficiently accurate model could be trained on these data, this list of features does not include any of the particulate matter measurements. If this system were to ignore one of its sensors, it would be significantly less resilient against sensor errors. To address this, we added back the NC0.5 feature to the data, as it is the most correlated with the target variable among the particulate matter measurements.
 
 \subsection{Error Insertion}
-To simulate sensor errors, we developed a method to randomly remove certain measurements from the dataset according to some assumed rate of error. This rate of error represents the chance that a given sensor reading will provide incorrect or missing data during any given sample. We chose to assume this error rate to be 40\%. This is an unrealistically high number, but it is low enough to ensur that the model is not completely useless while still providing a significant challenge. 
+To simulate sensor errors, we developed a method to randomly remove certain measurements from the dataset according to some assumed rate of error. This rate of error represents the chance that a given sensor reading will provide incorrect or missing data during any given sample. We chose to assume this error rate to be 40\%. This is an unrealistically high number, but it is low enough to ensure that the model is not completely useless while still providing a significant challenge. 
 
-Most of the features--with the exception of the particulate matter measurements--were collected using two sensors. To include this redundancy in the simulation, we assumed that both sensors that generate any feature would have to fail simultaneously in order for that feature to be missing for a given a sample. In other words, while 40\% of the particulate matter measurements were removed, only 20\% of the other measurements were removed.
+Most of the features--with the exception of the particulate matter measurements--were collected using two sensors. To include this redundancy in the simulation, we assumed that both sensors that generate any feature would have to fail simultaneously in order for that feature to be missing for a given a sample. In other words, while 40\% of the particulate matter measurements were removed, only 20\%\footnote{The joint probability formula $P(A\cap B=P(A)\times P(B))$ implies that this probability should actually be 16\%. We chose to use 20\% instead for the added challenge.} of the other measurements were removed. After applying this error simulation to the dataset, approximately 24.2\% of the data was removed.
 
 \subsection{Model Architecture}
 The model implemented a custom deep neural network
@@ -278,6 +278,24 @@ available, otherwise CPU.
 
 \subsection{Evaluation Methods}
 \subsubsection{Metrics}
+The performance of each model was evaluated using the following metrics:
+\begin{itemize}
+    \item Precision: The proportion of correctly identified fire alarms
+    \begin{equation}
+        \text{Precision} = \frac{\text{TP}}{\text{TP} + \text{FP}}
+    \end{equation}
+    \item Recall: Measures the proportion of actual fire cases detected by the model to minimize false negatives
+    \begin{equation}
+        \text{Recall} = \frac{\text{TP}}{\text{TP} + \text{FN}}
+    \end{equation}
+    \item F1-Score and Accuracy: Implements the harmonic mean of precision and recall with overall correctness of the model.
+    \begin{equation}
+        F1 = 2 \times \frac{\text{Precision} \times \text{Recall}}{\text{Precision} + \text{Recall}}
+    \end{equation}
+        \text{FPR} = \frac{\text{FP}}{\text{FP} + \text{TN}}
+    \end{equation}
+    \item Confusion Matrix: A visualization tool that lists the true positive/negative and false positive/negatives
+\end{itemize}
 \begin{itemize}
 \item Data Splitting: The dataset is split into 80/20
 percent for training/testing to evaluate model performance. 
