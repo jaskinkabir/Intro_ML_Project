@@ -139,8 +139,8 @@ versions of AlarmNet.
 
 \section{Approach}
 
-\section{Dataset and Training Setup}
-\section{Dataset}
+\section{Data Preparation}
+\subsection{Dataset}
 The dataset used in this project is the Smoke Detection
 Dataset provided by Stefan Blattmann\cite{dataset}. The
 dataset consists of approximately 62,629 sensor readings
@@ -169,7 +169,9 @@ sensors into a single dataset. The only sensor with no
 redundancy is the Sensirion SPS30, which measures
 particulate matter and is the most expensive sensor.
 
-Blattman placed his sensor array into various fire scenarios and recorded the measurements. He provided the following short list of scenarios during which he collected data:
+Blattman placed his sensor array into various fire scenarios
+and recorded the measurements. He provided the following
+short list of scenarios during which he collected data:
 \begin{itemize}
     \item Normal indoor
     \item Normal outdoor
@@ -181,8 +183,39 @@ Blattman placed his sensor array into various fire scenarios and recorded the me
 \end{itemize}
 \cite{Blattmann}
 
+\subsection{Train/Test Split}
+Before the dataset was passed to the models, it was split
+using an 80/20 train/test split. This means that 80\% of the
+data were randomly sampled and used to train the model,
+while the remaining 20\% were used to evaluate the model's
+performance. This split ensures that the model is not
+overfitting to the training data, as it is evaluated on data
+that it has not seen before.
+
+\subsection{Feature Scaling}
+After the train/test split, the features were scaled using
+standard scaling. This method subtracts the mean of the
+feature and divides by the standard deviation, ensuring that
+all features have a mean of 0 and a standard deviation of 1.
+This scaling is important because it ensures that the model
+does not learn to prioritize features with larger values,
+which could lead to poor generalization. The mean and
+standard deviation are calculated based on the training data
+and then applied to the test data to ensure that the model
+is evaluated on the same scale that it was trained on.
+
 \subsection{Feature Elimination}
-The dataset provided by Blattman originally included 15 features, which are listed in Table \ref{tab:features}. Of these 15, the two sample count features and the timestamp were removed as they do not provide any useful information for the model. Of the remaining 12 features, a crucial task was to determine which features were the most relevant to the target variable. Eliminating irrelevant variables reduces the complexity and computational cost of the model, as its input space shrinks in dimensionality. This reduction can also help prevent overfitting, as the model is less likely to learn noise in the data.
+The dataset provided by Blattman originally included 15
+features, which are listed in Table \ref{tab:features}. Of
+these 15, the two sample count features and the timestamp
+were removed as they do not provide any useful information
+for the model. Of the remaining 12 features, a crucial task
+was to determine which features were the most relevant to
+the target variable. Eliminating irrelevant variables
+reduces the complexity and computational cost of the model,
+as its input space shrinks in dimensionality. This reduction
+can also help prevent overfitting, as the model is less
+likely to learn noise in the data.
 
 \begin{table}[ht]
     \begingroup
@@ -203,7 +236,8 @@ The dataset provided by Blattman originally included 15 features, which are list
         \hline
         Pressure & Air pressure in hectoPascals \\
         \hline
-        TVOC & Total Volatile Organic Compounds in parts per billion \\
+        TVOC & Total Volatile Organic Compounds in parts per
+        billion \\
         \hline
         eC02 & Carbon Dioxide in parts per million \\
         \hline
@@ -211,15 +245,20 @@ The dataset provided by Blattman originally included 15 features, which are list
         \hline
         Raw Ethanol & Raw, uncompensated ethanol \\
         \hline
-        PM1.0 & Percentage of particles in the air less than 1.0$\mu m$ in diameter \\
+        PM1.0 & Percentage of particles in the air less than
+        1.0$\mu m$ in diameter \\
         \hline
-        PM2.5 & Percentage of particles in the air less than 2.5$\mu m$ in diameter \\
+        PM2.5 & Percentage of particles in the air less than
+        2.5$\mu m$ in diameter \\
         \hline
-        NC0.5 & Number concentration of particles in the air greater than 0.5$\mu m$ in diameter \\
+        NC0.5 & Number concentration of particles in the air
+        greater than 0.5$\mu m$ in diameter \\
         \hline
-        NC1.0 & Number concentration of particles in the air greater than 1.0$\mu m$ in diameter \\
+        NC1.0 & Number concentration of particles in the air
+        greater than 1.0$\mu m$ in diameter \\
         \hline
-        NC2.5 & Number concentration of particles in the air greater than 2.5$\mu m$ in diameter \\
+        NC2.5 & Number concentration of particles in the air
+        greater than 2.5$\mu m$ in diameter \\
         \hline
     \end{tabular}
     \vspace{1pt}
@@ -242,48 +281,71 @@ These top four features were:
     \item Pressure
     \item TVOC
 \end{enumerate}
-While a sufficiently accurate model could be trained on these data, this list of features does not include any of the particulate matter measurements. If this system were to ignore one of its sensors, it would be significantly less resilient against sensor errors. To address this, we added back the NC0.5 feature to the data, as it is the most correlated with the target variable among the particulate matter measurements.
+While a sufficiently accurate model could be trained on
+these data, this list of features does not include any of
+the particulate matter measurements. If this system were to
+ignore one of its sensors, it would be significantly less
+resilient against sensor errors. To address this, we added
+back the NC0.5 feature to the data, as it is the most
+correlated with the target variable among the particulate
+matter measurements.
 
 \subsection{Error Insertion}
-To simulate sensor errors, we developed a method to randomly remove certain measurements from the dataset according to some assumed rate of error. This rate of error represents the chance that a given sensor reading will provide incorrect or missing data during any given sample. We chose to assume this error rate to be 40\%. This is an unrealistically high number, but it is low enough to ensure that the model is not completely useless while still providing a significant challenge. 
+To simulate sensor errors, we developed a method to randomly
+remove certain measurements from the dataset according to
+some assumed rate of error. This rate of error represents
+the chance that a given sensor reading will provide
+incorrect or missing data during any given sample. We chose
+to assume this error rate to be 40\%. This is an
+unrealistically high number, but it is low enough to ensure
+that the model is not completely useless while still
+providing a significant challenge. 
 
-Most of the features--with the exception of the particulate matter measurements--were collected using two sensors. To include this redundancy in the simulation, we assumed that both sensors that generate any feature would have to fail simultaneously in order for that feature to be missing for a given a sample. In other words, while 40\% of the particulate matter measurements were removed, only 20\%\footnote{The joint probability formula $P(A\cap B=P(A)\times P(B))$ implies that this probability should actually be 16\%. We chose to use 20\% instead for the added challenge.} of the other measurements were removed. After applying this error simulation to the dataset, approximately 24.2\% of the data was removed.
+Most of the features--with the exception of the particulate
+matter measurements--were collected using two sensors. To
+include this redundancy in the simulation, we assumed that
+both sensors that generate any feature would have to fail
+simultaneously in order for that feature to be missing for a
+given a sample. In other words, while 40\% of the
+particulate matter measurements were removed, only
+20\%\footnote{The joint probability formula $P(A\cap
+B=P(A)\times P(B))$ implies that this probability should
+actually be 16\%. We chose to use 20\% instead for the added
+challenge.} of the other measurements were removed. After
+applying this error simulation to the dataset, approximately
+24.2\% of the data was removed.
 
 \subsection{Imputation}
-Before this data could be used to train a model, the missing values had to be replaced. We chose to use median imputation, which replaces missing values with the median of the corresponding feature calculated from the training dataset. This method was chosen because it is robust to outliers and skewed distributions, which are common in sensor data.
+Before this data could be used to train a model, the missing
+values had to be replaced. We chose to use median
+imputation, which replaces missing values with the median of
+the corresponding feature calculated from the training
+dataset. This method was chosen because it is robust to
+outliers and skewed distributions, which are common in
+sensor data.
 
-\subsection{Model Architecture}
-The model implemented a custom deep neural network
-(AlarmNet) for fire detection. The dataset's multivariate
-sensor data balance complexity and efficiency. Input layer
-size depends on the number of features such as 12 features
-as the initial full-feature model. It was reduced to 4
-features via a correlation ranking system. Hidden layers
-were added with (62,32) for a 12-feature model and a
-5-feature model. The 4-feature system uses (64,64) to
-provide additional capacity. All these models activated
-functions with ReLU( Rectified Linear Unit) introducing
-non-linearity and mitigating the vanishing gradient problem.
-The training model algorithm implemented the Adam Optimizer
-technique for its adaptive learning rate abilities with an
-initial learning rate of 1e-3 for most models and 1e-5 for
-the imputed error model. Parameters are updated using
-gradient descent with momentum adjustment for faster
-convergence. The learning rate is based on validation loss
-improvements, configured with a factor of 0.5 to halve the
-learning rate when performed. Having a patience of 4000
-iterations without improvement and a threshold of 1e-3 for
-significant improvements. In the training configuration,
-3000 epoch models were extended to 16,000 for the imputed
-error model to ensure convergence. Using epoch will improve
-based on the device GPU accelerated training on CUDA when
-available, otherwise CPU. 
+
+
+\section{Model Training and Evaluation}
 
 \subsection{Evaluation Methods}
 \subsubsection{Multiple Models}
-To ensure that the techniques used in this project are effective, we trained and evaluated multiple models. We trained a model based on the full 12-features of the dataset, a model based on the top 4 features, a model based on the top 5 features, and a model that included the NC0.5 feature for redundancy. We also trained a model that included the imputed error data. The performance of each model was evaluated using the following metrics:
+To ensure that the techniques used in this project are
+effective, we trained and evaluated multiple models. We
+trained a model based on the full 12-features of the
+dataset, a model based on the top 4 features, a model that
+included the NC0.5 feature for redundancy. We then compared
+the performance of these three models to determine if the
+feature elimination was necessary, and how adding back the
+NC0.5 feature affected this performance.
+
+We also trained a fully connected model on the imputed error
+data, and a simulation of a federated learning system. The
+performance of the federated model was then compared to the
+fully connected model.
 \subsubsection{Metrics}
-The performance of each model was evaluated using the following metrics:
+The performance of each model was evaluated using the
+following metrics:
 \begin{itemize}
     \item Recall: Measures the proportion of actual fire
     cases detected by the model to minimize false negatives.
@@ -292,55 +354,76 @@ The performance of each model was evaluated using the following metrics:
     \begin{equation}
         \text{Recall} = \frac{\text{TP}}{\text{TP} + \text{FN}}
     \end{equation}
-    \item Precision: The proportion of correctly identified fire alarms
+    \item Precision: The proportion of correctly identified
+    fire alarms
     \begin{equation}
         \text{Precision} = \frac{\text{TP}}{\text{TP} + \text{FP}}
     \end{equation}
-    \item F1-Score and Accuracy: Implements the harmonic mean of precision and recall with overall correctness of the model.
+    \item F1-Score and Accuracy: Implements the harmonic
+    mean of precision and recall with overall correctness of
+    the model.
     \begin{equation}
         F1 = 2 \times \frac{\text{Precision} \times \text{Recall}}{\text{Precision} + \text{Recall}}
     \end{equation}
-    \item Confusion Matrix: A visualization tool that lists the true positive/negative and false positive/negatives
+    \item Confusion Matrix: A visualization tool that lists
+    the true positive/negative and false positive/negatives
 \end{itemize}
 
-
-
-\begin{itemize}
-\item Data Splitting: The dataset is split into 80/20
-percent for training/testing to evaluate model performance. 
-\item Hardware: A code was implemented to perform on
-GPU(CUDA) for acceleration; otherwise CPU is available. 
-\item Training Configuration: Adam optimizer was implemented
-to configure with learning rates of 1e-3 for most models and
-1e-5 for the imputed error model. Learning rate by a factor
-of 0.5, the patience of 4000 epochs, and threshold 1e-3. In
-most models, 3000 epochs were implemented while 16,000
-epochs were for the imputed error model to ensure proper
-convergence on data. 
-\item Precision: Proportion of correctly identified fire
-alarms 
-\begin{equation}
-    \text{Precision} = \frac{\text{TP}}{\text{TP} + \text{FP}}
-\end{equation}
-\item Recall: Measures the proportion of actual fire cases
-detected by the model to minimize false negatives
-\begin{equation}
-    \text{Recall} = \frac{\text{TP}}{\text{TP} + \text{FN}}
-\end{equation}
-\item F1-Score and Accuracy: Implements harmonic mean of
-precision and recall with overall correctness of the model.
-\begin{equation}
-    F1 = 2 \times \frac{\text{Precision} \times \text{Recall}}{\text{Precision} + \text{Recall}}
-\end{equation}
-\item FPR: False Positive Rate measures the actual negatives
-that are incorrectly classified as positives 
-\begin{equation}
-    \text{FPR} = \frac{\text{FP}}{\text{FP} + \text{TN}}
-\end{equation}
-\item Confusion Matrix: This model visualizes true
-positive/negative and false positive/negatives
-\end{itemize}
 \subsubsection{Honeywell FS90 Simulation}
+The 2013 study mentioned in the introduction \ref{intro}
+only listed the Honeywell FS90's accuracy with no mention of
+precision, recall, or the raw data necessary to calculate
+these values. To provide a more accurate comparison, we
+developed a simple simulation of the FS90:
+
+First, we created a copy of the target column from the
+training data. Then we randomly selected 12.5\% of the
+datapoints in the data to flip, creating the FS90's 87.5\%
+accurate 'prediction'. To simulate sensor error, we assumed
+that the FS90 had a 20\% chance of experiencing a sensor
+error during any given sample. This error rate was chosen to
+match the rate of error in the AlarmNet model. We then
+assumed that during a sensor error, the FS90 would indicate
+that it did not detect a fire. To apply this to the
+simulation, we randomly selected 20\% of the prediction
+data. If the FS90 predicted a detected a fire during any of
+these samples, we flipped the prediction to indicate that it
+did not detect a fire. This simulation allowed us to
+calculate the recall and precision of the FS90 with and
+without sensor error, which we then compared to the AlarmNet
+models.
+
+\subsection{Model Architectures}
+For the model trained on the 12-feature model, the fully
+connected neural network included an input layer of 12
+neurons, two hidden layers of 64 and 32 neurons
+respectively, and a layer consisting of one output neuron.
+The 4 and 5-feature models used input layers of 4 and 5
+neurons respectively, two hidden layers both consisting of
+64 neurons, and one output neuron. Between each layer, a
+ReLU activation function was used. This introduced
+nonlinearity into the model, allowing it to learn complex
+patterns in the data and ensuring its loss function was
+differentiable. After the output layer, a sigmoid activation
+function was applied to ensure that the output was between 0
+and 1.
+
+To allow the fully connected model trained on the data with
+errors inserted into it, the architecture was increased to a
+model with three hidden layers each consisting of 256
+neurons. This allowed the model to learn more complex
+patterns in the data and ensured that it could handle the
+noisy and incomplete data.
+
+The model used in the federated learning simulation used
+three hidden layers consisting of 32, 16, and 8 neurons.
+This model includes fewer neurons than any other model to
+ensure that it is less computationally intensive. This model
+was trained on three clients, each with a copy of the global
+model. The clients trained their local models on their own
+data, and then sent the weights of their models to the
+global model. The global model then averaged these weights
+to create a new global model.
 
 
 
