@@ -339,10 +339,10 @@ the performance of these three models to determine if the
 feature elimination was necessary, and how adding back the
 NC0.5 feature affected this performance.
 
-We also trained a fully connected model on the imputed error
+We also trained a model on the imputed error
 data, and a simulation of a federated learning system. The
 performance of the federated model was then compared to the
-fully connected model.
+centralized model.
 \subsubsection{Metrics}
 The performance of each model was evaluated using the
 following metrics:
@@ -372,9 +372,9 @@ following metrics:
 \subsubsection{Honeywell FS90 Simulation}
 The 2013 study mentioned in the introduction only listed the
 Honeywell FS90's accuracy with no mention of precision,
-recall, or the raw data necessary to calculate these values\cite{smokeacc}.
-To provide a more accurate comparison, we developed a simple
-simulation of the FS90:
+recall, or the raw data necessary to calculate these
+values\cite{smokeacc}. To provide a more accurate
+comparison, we developed a simple simulation of the FS90:
 
 First, we created a copy of the target column from the
 training data. Then we randomly selected 12.5\% of the
@@ -394,14 +394,20 @@ without sensor error, which we then compared to the AlarmNet
 models.
 
 \subsubsection{SVM Benchmark}
-We trained a Support Vector Machine(SVM) on the same dataset as the model trained on the imputed error data. The SVM model was chosen as it was the best performing of the classical machine learning techniques on this dataset. The performance of this model was compared to the fully connected models to ensure that neural networks are the necessary for this application.
+We trained a Support Vector Machine(SVM) on the same dataset
+as the model trained on the imputed error data. The SVM
+model was chosen as it was the best performing of the
+classical machine learning techniques on this dataset. The
+performance of this model was compared to the fully
+connected models to ensure that neural networks are the
+necessary for this application.
 
 \subsection{Model Architectures}
-For the model trained on the 12-feature model, the fully
+For the model trained on the 12-input model, the fully
 connected neural network included an input layer of 12
 neurons, two hidden layers of 64 and 32 neurons
 respectively, and a layer consisting of one output neuron.
-The 4 and 5-feature models used input layers of 4 and 5
+The 4 and 5-input models used input layers of 4 and 5
 neurons respectively, two hidden layers both consisting of
 64 neurons, and one output neuron. Between each layer, a
 ReLU activation function was used. This introduced
@@ -411,7 +417,7 @@ differentiable. After the output layer, a sigmoid activation
 function was applied to ensure that the output was between 0
 and 1.
 
-To allow the fully connected model trained on the data with
+To allow the centralized model trained on the data with
 errors inserted into it, the architecture was increased to a
 model with three hidden layers each consisting of 256
 neurons. This allowed the model to learn more complex
@@ -430,7 +436,15 @@ to create a new global model.
 
 \subsection{Training}
 \subsubsection{Network Classes}
-To train these models, we used the PyTorch library to develop the \texttt{AlarmNet} class. This class has a configurable number and size of hidden layers so that a new class doesn't have to be written for each network configuration. The class also includes methods to train the model, evaluate its performance, and generate visualizations of the model's performance. The class was then used to train the models on the training data and evaluate their performance on the test data.
+To train these models, we used the PyTorch library to
+develop the \texttt{AlarmNet} class. This class has a
+configurable number and size of hidden layers so that a new
+class doesn't have to be written for each network
+configuration. The class also includes methods to train the
+model, evaluate its performance, and generate visualizations
+of the model's performance. The class was then used to train
+the models on the training data and evaluate their
+performance on the test data.
 
 Additionally, a \texttt{FederatedLearning} class was
 developed to simulate the federated learning system. Upon
@@ -444,70 +458,87 @@ of each model are  averaged to update the global model. This
 model is then evaluated on the test data to determine its
 performance. $n$ is a configurable parameter, and so are the
 number of training epochs each client trains for and how
-many times this process is repeated.
-\footnote{The code can be found at \url{https://github.com/jaskinkabir/Intro_ML_Project}}
+many times this process is repeated. \footnote{The code can
+be found at
+\url{https://github.com/jaskinkabir/Intro_ML_Project}}
 
 \subsubsection{Training Parameters}
-The models were trained using the Adam optimizer. The loss function used was binary cross-entropy, which is commonly used for binary classification problems. The models trained on the data without inserted errors used a learning rate of $10^{-3}$ and were trained for 3000 epochs. 
+The models were trained using the Adam optimizer. The loss
+function used was binary cross-entropy, which is commonly
+used for binary classification problems. The models trained
+on the data without inserted errors used a learning rate of
+$10^{-3}$ and were trained for 3000 epochs. 
 
-To accommodate the error model's larger architecture, the learning rate was reduced to $10^{-5}$ and the model was trained for 16000 epochs. 
+To accommodate the error model's larger architecture, the
+learning rate was reduced to $10^{-5}$ and the model was
+trained for 16000 epochs. 
 
-The federated model was trained with a learning rate of $10^{-3}$ for the global model and the clients. We chose to simulate three clients, each performing 600 training epochs per round. The process of training the client models for 600 epochs and averaging their weights was repeated 3 times.
+The federated model was trained with a learning rate of
+$10^{-3}$ for the global model and the clients. We chose to
+simulate three clients, each performing 600 training epochs
+per round. The process of training the client models for 600
+epochs and averaging their weights was repeated 3 times.
 
 \section{Results and Analysis}
-In a comparative analysis, SVM(Support Vector Machine) and
-NN (Neural Network) were both considered for fire detection
-within the 12-feature test bench. Neural networks are
-ultimately chosen for their superior flexibility and
-robustness. SVMs are known for their simplicity and
-effectiveness within smaller datasets due to their ability
-to model linear and non-linear relationships using kernel
-functions. However, in this dataset, the project had a large
-size of 62,000 samples which limited the SVM training model
-as memory requirement scale quadratically with the number of
-samples. On the other hand neural network demonstrates
-superior performance and adaptability. They efficiently
-scaled with large datasets by leveraging batch size gradient
-descent and GPU acceleration with mixed precision and
-gradient scaling. It can learn hierarchical features
-representing them as particularity effective for
-multi-sensor data its architecture model is tailored to
-handle noisy and missing data, as seen in the imputed error
-model under results., It can maintain high recall and
-precision under a 20 percent error rate. The full feature
-model utilizes all 12 -features that achieved high precision
-and recall but its computational complexity made it less
-efficient. After using a correlation technique ranking them
-by target variable it reduced to 4 and 5 feature sets
-retaining only the top four features ( Humidity, Raw
-Ethanol, Pressure, and TVOC), achieved performance to the
-full feature model with minimal precision loss of 0.1
-percent. It significantly improved making it more suitable
-for different environments. The redundant feature model
-added the NC0.5 enchanting redundancy and improved
-robustness maintaining efficiency. The imputed error model
-designed to handle noisy and missing data shows a resilience
-with 20 percent error rate. Thus outperforming the Honeywell
-FS90 system. In addition to accuracy and recall, time was
-evaluated to determine real-time applicability. The proposed
-models achieve an average time of 2e-2 seconds per sample
-making them viable for deployment in fire detection systems.
-Evaluation metrics showed visual comparison including
-confusion matrices, and bar charts illustrating the superior
-performance. The reduced features and imputed error and
-aggregation demonstrated the ability to balance accuracy,
-efficiency, and robustness for real-world fire detection
-applications. The Federated model trains the local copy of a
-global model using local data. The training sends model
-weights (weights of the neurons in the neural network) to
-the global mode. The federate and AlarmNet achieve near
-identical accuracy. These bar graphs show the comparison of
-recall with and without error and precision with 20 percent
-error and without. With Machine Learning algorithms, it was
-able to provide excellent validation against Honeywell FS90
-highlighting the potential ANN that can provide for
-enchanting better real-world safety protocols (fig 18 and
-19). 
+The model trained on the full 12-features achieved a near
+100\% accuracy, which can be seen in the confusion matrix
+depicted in Figure \ref{fig:12cm}. While this model achieved
+high precision and recall, its computational complexity
+makes it less inefficient, and difficult to scale for
+handling the errored data. 
+
+The model trained on the top four most correlated features
+did not perform as well, however. As shown in Figure
+\ref{fig:4met}, eliminating all but the top four features
+lead to a drop in accuracy of 0.07\% and a drop in precision
+of 0.1\%. While this drop in performance is minimal, it is
+still significant. This suggests that the particulate matter
+measurements are important for the model's performance. 
+
+This is further supported by the confusion matrix displayed
+in Figure \ref{fig:5cm} and the metrics shown by Figure
+\ref{fig:5met}. By adding back the NC0.5 feature, the model
+was able to achieve almost the exact same performance as the
+12-input model. 
+
+After applying the error insertion and imputation, the model
+still performed impressively well. As shown in Figure
+\ref{fig:errmet}, the model trained on the errored data
+achieved an accuracy of 98.36\% and a recall of 99.76\%.
+This marks a drop in accuracy of 1.66\%, but a drop in
+recall of only 0.21\%. As recall is the most important
+metric for a fire detection system, this performance is much
+higher than expected. The confusion matrix for this model
+can be seen in Figure \ref{fig:errcm}.
+
+As a benchmark, the SVM model was trained on the same
+training dataset and evaluated on the same validation data
+as the model trained on the errored dataset. From the
+metrics shown in Figure \ref{fig: SVM Model}, This model was
+6.14\% less accurate than the centralized model, and
+scored 0.26\% lower in recall. This demonstrates that the
+neural network is better suited for this application than
+the SVM. 
+ 
+SVMs are known for their simplicity and effectiveness within
+smaller datasets due to their ability to model linear and
+non-linear relationships using kernel functions. However, in
+this dataset, the project had a large size of 62,000 samples
+which limited the SVM as its memory requirement scales
+quadratically with the number of samples. On the other hand
+the neural networks demonstrated superior performance and
+adaptability. They efficiently scaled with large datasets by
+leveraging GPU acceleration with mixed precision and
+gradient scaling.
+
+As shown in Figure \ref{fig:fed12} The 12-input federated model performed worse than the 12-input centralized model, likely due to its reduced complexity. However, the 5-input federated model performed almost identically to the 5-input centralized model, which can be seen in Figure \ref{fig:fed5}. 
+
+Additionally, Figure \ref{fig:federr} shows that the
+federated model trained on the errored dataset still
+performs exceptionally well in terms of precision and
+recall. 
+
+Finally, Figure \ref{fig:compprec} and Figure \ref{fig:comprecall} show a comparison between the federated and centralized models, as well as the Honeywell FS90 in terms of precision and recall respectively. The federated model performed almost identically to the centralized model and both massively outperformed the FS90. This shows that the federated model was able to achieve incredible accuracy and recall while being the least computationally intensive model and proves that the AlarmNet system is a viable solution for fire detection.
 
 \section{Lessons Learned}
 This machine learning model successfully demonstrated the
@@ -518,7 +549,7 @@ real-world scenarios such as noisy or missing sensor data.
 Feature selections and target preparation, including median
 imputation and error handling, ensure the model's
 exploration. The reduced feature model maintained comparable
-performance to the 12-feature model significantly reducing
+performance to the 12-input model significantly reducing
 computational requirements and making it good for
 constrained environments. Comparative analysis highlights
 the proposed neural network over the traditional such as
@@ -538,11 +569,6 @@ high-end companies such as Honeywell to ensure the power of
 ANN to contribute to improving safety and reliability in
 diverse environments.
 
-
-
-
-
-
 \section{Contributions}
 \begin{itemize}
 \item\textbf{Matthew Anderson:} 
@@ -555,7 +581,7 @@ diverse environments.
 \begin{itemize}
     \item Project Manager
     \item Dataset Selection, Preparation, and Analysis
-    \item AlarmNet Class that contained the fully connected
+    \item AlarmNet Class that contained the centralized
     model
     \item Error insertion and imputation
     \item Edited Report and Presentation
@@ -568,146 +594,144 @@ diverse environments.
     \item Data Visualization
 \end{itemize}
 \end{itemize}
-\subsection{References}
-
+\vfill\null
 \bibliographystyle{IEEEtran}
 \bibliography{refs.bib}
 
+\newpage
+\center{\Large{Figures}}
 
-
-\subsection{Results} 
-
-\begin{figure}
+\begin{figure}[htbp]
     \centering
     \includegraphics[width=0.75\linewidth]{images/SVM.png}
     \caption{SVM Metric}
     \label{fig: SVM Model}
 \end{figure}
 
-\begin{figure}
+\begin{figure}[htbp]
     \centering
     \includegraphics[width=0.75\linewidth]{images/12acc.png}
     \caption{12 - Feature Metrics}
-    \label{fig: 1.0 }
+    \label{fig: 12metric }
 \end{figure}
 
-\begin{figure}
+\begin{figure}[htbp]
     \centering
     \includegraphics[width=0.75\linewidth]{images/12CM.png}
     \caption{12 - Feature Loss Curve}
-    \label{fig: 1.2}
+    \label{fig: 12loss}
 \end{figure}
 
-\begin{figure}
+\begin{figure}[htbp]
     \centering
     \includegraphics[width=0.75\linewidth]{images/12CMM.png}
     \caption{12 - Feature Confusion Matrix}
-    \label{fig:1.3}
+    \label{fig:12cm}
 \end{figure}
 
-\begin{figure}
+\begin{figure}[htbp]
     \centering
     \includegraphics[width=0.7\linewidth]{images/Corr.png}
     \caption{Features}
-    \label{fig:2.0-label}
+    \label{fig:corr}
 \end{figure}
 
-\begin{figure}
+\begin{figure}[htbp]
     \centering
     \includegraphics[width=0.75\linewidth]{images/4metric.png}
     \caption{4 - Feature Metrics}
-    \label{fig:3.0}
+    \label{fig:4met}
 \end{figure}
 
-\begin{figure}
+\begin{figure}[htbp]
     \centering
     \includegraphics[width=0.75\linewidth]{images/4LC.png}
     \caption{4 - Feature Loss Curves}
-    \label{fig:3.1}
+    \label{fig:4loss}
 \end{figure}
 
-\begin{figure}
+\begin{figure}[htbp]
     \centering
     \includegraphics[width=0.75\linewidth]{images/4CM.png}
     \caption{4 - Feature Confusion Matrix}
-    \label{fig:3.2}
+    \label{fig:4cm}
 \end{figure}
 
-\begin{figure}
+\begin{figure}[htbp]
     \centering
     \includegraphics[width=0.75\linewidth]{images/5metric.png}
     \caption{5 - Feature Metrics}
-    \label{fig:4.0}
+    \label{fig:5met}
 \end{figure}
 
-\begin{figure}
+\begin{figure}[htbp]
     \centering
     \includegraphics[width=0.75\linewidth]{images/5LC.png}
     \caption{5 - Feature Loss Curves}
-    \label{fig:4.1}
+    \label{fig:5loss}
 \end{figure}
 
-\begin{figure}
+\begin{figure}[htbp]
     \centering
     \includegraphics[width=0.75\linewidth]{images/5CM.png}
     \caption{5 - Feature Confusion Matrix}
-    \label{fig:4.2}
+    \label{fig:5cm}
 \end{figure}
 
-\begin{figure}
+\begin{figure}[htbp]
     \centering
     \includegraphics[width=0.75\linewidth]{images/imputationmetric.png}
     \caption{Imputation Metrics}
-    \label{fig:5.0}
+    \label{fig:errmet}
 \end{figure}
-\begin{figure}
+\begin{figure}[htbp]
     \centering
     \includegraphics[width=0.75\linewidth]{images/ImputationLC.png}
     \caption{Imputation Loss Curves}
-    \label{fig:5.1}
+    \label{fig:errloss}
 \end{figure}
 
-\begin{figure}
+\begin{figure}[htbp]
     \centering
     \includegraphics[width=0.75\linewidth]{images/ImputationCM.png}
     \caption{Imputation Confusion Matrix}
-    \label{fig:5.2}
+    \label{fig:errcm}
 \end{figure}
 
 
-\begin{figure}
+\begin{figure}[htbp]
     \centering
     \includegraphics[width=1\linewidth]{images/12Fed.png}
-    \caption{Federarted Learning: 12-Features}
-    \label{fig:6.0}
+    \caption{Federated Learning: 12-Features}
+    \label{fig:fed12}
 \end{figure}
 
-\begin{figure}
+\begin{figure}[htbp]
     \centering
     \includegraphics[width=1\linewidth]{images/5Fed.png}
     \caption{Federated Learning: 5-Features}
-    \label{fig:6.1}
+    \label{fig:fed5}
 \end{figure}
 
-\begin{figure}
+\begin{figure}[htbp]
     \centering
     \includegraphics[width=1\linewidth]{images/FedHandling.png}
     \caption{Federated Learning: Error handling}
-    \label{fig:6.2}
+    \label{fig:federr}
 \end{figure}
 
-\begin{figure}
+\begin{figure}[htbp]
     \centering
     \includegraphics[width=0.75\linewidth]{images/Recall.png}
     \caption{Recall Comparison Honeywell FS90 Vs AlarmNet ANN Vs Federated}
-    \label{fig:7.0}
+    \label{fig:comprecall}
 \end{figure}
 
-\begin{figure}
+\begin{figure}[htbp]
     \centering
     \includegraphics[width=0.75\linewidth]{images/PrecisionComparison.png}
     \caption{Precison Comparison Honeywell FS90 Vs AlarmNet ANN Vs Federated}
-    \label{fig:7.1}
+    \label{fig:compprec}
 \end{figure}
 
 \end{document}

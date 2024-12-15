@@ -1,0 +1,6 @@
+Contributions:
+
+Matt did the federated learning work on his own, and was very helpful in putting this project together
+Axel was a huge help as well. He was useful to bounce ideas off of, and Matt and I could rely on him to put together a well-written report and presentation while we focused all of our time on the code
+
+I was very happy to work with both Matt and Axel
