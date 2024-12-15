@@ -54,12 +54,16 @@ AI-based fire detectors have massively outperformed
 traditional systems, little work has addressed handling
 sensor failures. To address this challenge, we propose
 \textbf{AlarmNet}, a robust fire detection system that
-incorporates erroneous sensor data during training. 
-
-In our experiments, sensor errors were introduced by
-randomly replacing 24.2\% of the dataset’s measurements with
-missing or faulty values. We applied a pre-processing step
-that replaced these values with the median of the
+incorporates erroneous sensor data during training.
+We investigate two implementations of AlarmNet: a
+centralized model trained on a single server and a
+simulation of a federated model where training is
+distributed across multiple clients and aggregated into a
+global model. 
+In our experiments, sensor errors were introduced
+by randomly replacing 24.2\% of the dataset’s measurements
+with missing or faulty values. We applied a pre-processing
+step that replaced these values with the median of the
 corresponding training features. Our 3-layer artificial
 neural network The model achieved an accuracy of 98.38\% and
 successfully detected 99.73\% of fires, despite the high
@@ -69,7 +73,6 @@ trained on complete data, and a significant 41.51\%
 improvement over a simulated commercial-grade fire alarm
 system." The federated approach delivered comparable results
 while utilizing a less computationally intensive model.
-
 In future work, we aim to extend this approach to develop a
 real-world fire detection system capable of maintaining
 robustness against sensor failures.
@@ -78,7 +81,7 @@ robustness against sensor failures.
 \begin{IEEEkeywords}
 machine learning (ML), algorithm, model. Artificial Neural
 Network, Imputation, Sensor fusion, Fire Alarms, Fire
-Detection
+Detection, Error Handling, Federated Learning
 \end{IEEEkeywords}
 
 \section{Introduction and Motivation}
