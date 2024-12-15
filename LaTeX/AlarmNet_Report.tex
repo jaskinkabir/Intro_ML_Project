@@ -249,6 +249,9 @@ To simulate sensor errors, we developed a method to randomly remove certain meas
 
 Most of the features--with the exception of the particulate matter measurements--were collected using two sensors. To include this redundancy in the simulation, we assumed that both sensors that generate any feature would have to fail simultaneously in order for that feature to be missing for a given a sample. In other words, while 40\% of the particulate matter measurements were removed, only 20\%\footnote{The joint probability formula $P(A\cap B=P(A)\times P(B))$ implies that this probability should actually be 16\%. We chose to use 20\% instead for the added challenge.} of the other measurements were removed. After applying this error simulation to the dataset, approximately 24.2\% of the data was removed.
 
+\subsection{Imputation}
+Before this data could be used to train a model, the missing values had to be replaced. We chose to use median imputation, which replaces missing values with the median of the corresponding feature calculated from the training dataset. This method was chosen because it is robust to outliers and skewed distributions, which are common in sensor data.
+
 \subsection{Model Architecture}
 The model implemented a custom deep neural network
 (AlarmNet) for fire detection. The dataset's multivariate
@@ -277,25 +280,31 @@ based on the device GPU accelerated training on CUDA when
 available, otherwise CPU. 
 
 \subsection{Evaluation Methods}
+\subsubsection{Multiple Models}
+To ensure that the techniques used in this project are effective, we trained and evaluated multiple models. We trained a model based on the full 12-features of the dataset, a model based on the top 4 features, a model based on the top 5 features, and a model that included the NC0.5 feature for redundancy. We also trained a model that included the imputed error data. The performance of each model was evaluated using the following metrics:
 \subsubsection{Metrics}
 The performance of each model was evaluated using the following metrics:
 \begin{itemize}
+    \item Recall: Measures the proportion of actual fire
+    cases detected by the model to minimize false negatives.
+    This is the most important metric, as it is crucial that
+    the model detects as many fires as possible.
+    \begin{equation}
+        \text{Recall} = \frac{\text{TP}}{\text{TP} + \text{FN}}
+    \end{equation}
     \item Precision: The proportion of correctly identified fire alarms
     \begin{equation}
         \text{Precision} = \frac{\text{TP}}{\text{TP} + \text{FP}}
-    \end{equation}
-    \item Recall: Measures the proportion of actual fire cases detected by the model to minimize false negatives
-    \begin{equation}
-        \text{Recall} = \frac{\text{TP}}{\text{TP} + \text{FN}}
     \end{equation}
     \item F1-Score and Accuracy: Implements the harmonic mean of precision and recall with overall correctness of the model.
     \begin{equation}
         F1 = 2 \times \frac{\text{Precision} \times \text{Recall}}{\text{Precision} + \text{Recall}}
     \end{equation}
-        \text{FPR} = \frac{\text{FP}}{\text{FP} + \text{TN}}
-    \end{equation}
     \item Confusion Matrix: A visualization tool that lists the true positive/negative and false positive/negatives
 \end{itemize}
+
+
+
 \begin{itemize}
 \item Data Splitting: The dataset is split into 80/20
 percent for training/testing to evaluate model performance. 
