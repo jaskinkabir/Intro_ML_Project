@@ -370,11 +370,11 @@ following metrics:
 \end{itemize}
 
 \subsubsection{Honeywell FS90 Simulation}
-The 2013 study mentioned in the introduction \ref{intro}
-only listed the Honeywell FS90's accuracy with no mention of
-precision, recall, or the raw data necessary to calculate
-these values. To provide a more accurate comparison, we
-developed a simple simulation of the FS90:
+The 2013 study mentioned in the introduction only listed the
+Honeywell FS90's accuracy with no mention of precision,
+recall, or the raw data necessary to calculate these values\cite{smokeacc}.
+To provide a more accurate comparison, we developed a simple
+simulation of the FS90:
 
 First, we created a copy of the target column from the
 training data. Then we randomly selected 12.5\% of the
@@ -392,6 +392,9 @@ did not detect a fire. This simulation allowed us to
 calculate the recall and precision of the FS90 with and
 without sensor error, which we then compared to the AlarmNet
 models.
+
+\subsubsection{SVM Benchmark}
+We trained a Support Vector Machine(SVM) on the same dataset as the model trained on the imputed error data. The SVM model was chosen as it was the best performing of the classical machine learning techniques on this dataset. The performance of this model was compared to the fully connected models to ensure that neural networks are the necessary for this application.
 
 \subsection{Model Architectures}
 For the model trained on the 12-feature model, the fully
@@ -425,69 +428,8 @@ data, and then sent the weights of their models to the
 global model. The global model then averaged these weights
 to create a new global model.
 
+\subsection{Training}
 
-
-\subsection{Model Architecture and Training}
-
-\textbf 
-In the real world sensor data, is often due to hardware
-communication limitations and errors. It can lead to
-incomplete or noisy environmental factors. The reliability
-of the model can go in such conditions in error handling
-using robust strategies to incorporate into the model and
-training process. These strategies allowed the model to
-maintain high accuracy and recall during the sensor error
-process. In simulating real-world scenarios, errors were
-intentionally introduced into the dataset. In the model run,
-20 percent was applied across all features, with particulate
-matter (PM) sensors likely to encounter errors due to
-insufficient redundancy. The dataset showed four sensors in
-their categories, temperature and Humidity, Pressure, (TVOC,
-CO2, Ethanol, H2), and Particulate Matter ( NC0.5, NC1.0,
-NC2.5, PM1.0, PM2.5). erroneous values were represented as
-missing data (NaN) or extreme outliers to emulate hardware
-failures or any communication drops. Missing values were
-handled using median imputation, which replaces erroneous
-values with the median of the corresponding feature
-calculated from the training dataset. The median was chosen
-against outliers suitable for skew distributions in sensor
-data. Imputation implementation ensures the dataset remains
-intact, allowing it to learn effectively. The feature was
-further improved by identifying the most correlated features
-with fire detection. Key features such as TVOC, Pressure,
-Raw Ethanol, and Humidity were retained.    
-The training process specialized adjustments for handling
-noisy and incomplete data. During the deep ANN error
-handling architecture of [(256,256,256)] for better
-resolution. Extending training epochs were used, enabling
-the model to generalize effectively. In the error handling
-stage, errors were introduced to replicate real-world
-conditions challenging the robustness of the architecture.
-The implementation strategy introduced erroneous or missing
-values were replaced with the median of each feature to
-maintain data integrity. The imputation approach was
-particularly effective for skewed feature distributions
-which enchanted the model ([256,256,256]) and demonstrated
-resilience to noisy and incomplete data. The imputed error
-model showcased its ability to handle a 20 percent sensor
-error rate with minimal performance degradation and
-showcasing minimized false negatives under challenging
-conditions. Performance metrics were involved in all models
-to evaluate using recall, precision, F1-Score, and confusion
-matrices. The model was benchmarked against the Honeywell
-FS90 fire detection system. Comparison revealed superior
-recall and resilience in the proposed model, under simulated
-noisy conditions, such as histograms of missing values and
-bar charts comparing recall and recall without errors
-showing the model's robustness. Furthermore, the size and
-fast inference of the final model exported in ONNX format
-ensure the deployment in real-time IoT scenarios of fire
-detection systems. These error-handling strategies
-demonstrate the model's ability to adapt to real-world
-challenges for a reliable solution in fire detection in
-different environments. Simulating error handling,
-imputation, and targeted features in correlation highlights
-the model's resilience and practical applications. 
 
 \section{Results and Analysis}
 In a comparative analysis, SVM(Support Vector Machine) and
