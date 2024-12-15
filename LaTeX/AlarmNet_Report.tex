@@ -24,7 +24,7 @@
 
 \title{ Fire Detection With Erroneous Input Correction\\
         { \footnotesize ECGR 4105/5105 - Introduction to
-            Machine Learning} }
+        Machine Learning} }
 
 \author{\IEEEauthorblockN{1\textsuperscript{st} Jaskin
 Kabir} \IEEEauthorblockA{\textit{ECGR Student} \\
@@ -54,92 +54,93 @@ AI-based fire detectors have massively outperformed
 traditional systems, little work has addressed handling
 sensor failures. To address this challenge, we propose
 \textbf{AlarmNet}, a robust fire detection system that
-incorporates erroneous sensor data during training.
-We investigate two implementations of AlarmNet: a
-centralized model trained on a single server and a
-simulation of a federated model where training is
-distributed across multiple clients and aggregated into a
-global model. 
-In our experiments, sensor errors were introduced
-by randomly replacing 24.2\% of the dataset’s measurements
-with missing or faulty values. We applied a pre-processing
-step that replaced these values with the median of the
-corresponding training features. Our 3-layer artificial
-neural network The model achieved an accuracy of 98.38\% and
-successfully detected 99.73\% of fires, despite the high
-rate of sensor errors. This resulted in only a 0.25\%
-reduction in detection performance compared to a model
-trained on complete data, and a significant 41.51\%
-improvement over a simulated commercial-grade fire alarm
-system." The federated approach delivered comparable results
-while utilizing a less computationally intensive model.
-In future work, we aim to extend this approach to develop a
-real-world fire detection system capable of maintaining
-robustness against sensor failures.
+incorporates erroneous sensor data during training. We
+investigate two implementations of AlarmNet: a centralized
+model trained on a single server and a simulation of a
+federated model where training is distributed across
+multiple clients and aggregated into a global model. In our
+experiments, sensor errors were introduced by randomly
+replacing 24.2\% of the dataset’s measurements with missing
+or faulty values. We applied a pre-processing step that
+replaced these values with the median of the corresponding
+training features. Our 3-layer artificial neural network The
+model achieved an accuracy of 98.38\% and successfully
+detected 99.73\% of fires, despite the high rate of sensor
+errors. This resulted in only a 0.25\% reduction in
+detection performance compared to a model trained on
+complete data, and a significant 41.51\% improvement over a
+simulated commercial-grade fire alarm system." The federated
+approach delivered comparable results while utilizing a less
+computationally intensive model. In future work, we aim to
+extend this approach to develop a real-world fire detection
+system capable of maintaining robustness against sensor
+failures.
 \end{abstract}
 
 \begin{IEEEkeywords}
-machine learning (ML), algorithm, model. Artificial Neural
+machine learning (ML), algorithm, model, Artificial Neural
 Network, Imputation, Sensor fusion, Fire Alarms, Fire
 Detection, Error Handling, Federated Learning
 \end{IEEEkeywords}
 
-\section{Introduction and Motivation}
-\subsection{Introduction}\label{intro} 
+\section{Introduction and Motivation}\label{intro} 
+\subsection{Introduction}
 
 Fire alarm systems play a critical role in safeguarding
 lives and property by providing early warnings of fire
-hazards. Traditional systems, however, often rely on single
-sensors with limited detection capabilities. These systems
-are highly susceptible to sensor failures, which can render
-them ineffective and pose significant safety risks. In
-addition, the prevalence of false alarms reduces their
+hazards. Traditional systems, however, often rely on one or
+two sensors with limited detection capabilities. These
+systems are highly susceptible to sensor failures, which can
+render them ineffective and pose significant safety risks.
+In addition, the prevalence of false alarms reduces their
 reliability and can lead to complacency or unnecessary
 emergency responses. While artificial intelligence
 (AI)-based fire detectors have demonstrated significant
-improvements in accuracy and performance over traditional
-systems, they generally assume clean, error-free sensor
-data. This assumption limits their practical applicability,
-especially in real-world scenarios where sensor errors and
-failures are common.
+improvements in performance over traditional systems, they
+generally rely on error-free sensor data. This limits their
+practical applicability, especially in real-world scenarios
+where sensor errors and failures are common.
 
 To address these challenges, we propose AlarmNet, a robust
-AI-based fire detection system designed to handle sensor
-errors effectively. AlarmNet is trained on a dataset from which
-randomly selecteded measurements were removed. This approach
-enables the model to learn to detect fires accurately even
-in the presence of sensor errors. We explore
-two implementations of AlarmNet: a centralized model trained
-on a single server and a federated model where training is
-distributed across multiple clients and aggregated into a
-global model. This dual approach ensures scalability and
-flexibility while maintaining high detection accuracy. In
-this paper, we detail the design, implementation, and
-evaluation of AlarmNet, demonstrating its effectiveness in
-handling real-world sensor failures. A 2013 study found the
-Honeywell FS90, a widely used commercial fire detection
-system, only achieves an accuracy of 87.5\%\cite{smokeacc}.
-This contributes to deaths, injuries, and damage due to
-fires in two ways: Firstly when a fire occurs and the fire
-detection system fails to recognize it, the occupants of the
-building can only react to the fire once they are close
-enough observe it, which often means it is too late to
-evacuate. Secondly, a 1995 report stated that fewer than
-25\% of residents of mid-rise residential buildings
-interpreted the sound of the fire alarm as a potential
-indication of a real emergency\cite{crywolf}. As false--or
-'nuisance'--alarms are so common, even when the alarm sounds
-for a real fire, occupants may not evacuate since they won't
-take it seriously.
+AI-based fire detection system specifically engineered to
+remain accurate in the presence of sensor errors. AlarmNet
+is trained on a dataset from which randomly selected
+measurements were removed. This approach enables the model
+to learn to detect fires accurately based on an arbitrary
+selection of the sensors it has available. The system is
+evaluated in two configurations: a centralized model trained
+on a single server and a simulation of a federated model,
+where training is distributed across multiple clients and
+aggregated into a global model. This dual approach allows us
+to investigate two key questions: (1) whether it is possible
+to train a model that can handle sensor errors, and (2)
+whether a federated model can achieve comparable performance
+while utilizing fewer computational resources. If the
+federated model meets this goal, it would demonstrate AlarmNet's viability as a real-world fire detection system. This paper first details the analysis and preparation of the chosen dataset, followed by a disussion of the design, implementation, and evaluation of both versions of AlarmNet.
+
+
+\subsection{Motivation}\label{mot}
+
+A 2013 study found the Honeywell FS90, a widely used
+commercial fire detection system, only achieves an accuracy
+of 87.5\%\cite{smokeacc}. This contributes to deaths,
+injuries, and damage due to fires in two ways: Firstly when
+a fire occurs and the fire detection system fails to
+recognize it, the occupants of the building can only react
+to the fire once they are close enough observe it. This
+often means it is too late to evacuate. Secondly, a 1995
+report stated that fewer than 25\% of residents of mid-rise
+residential buildings interpreted the sound of the fire
+alarm as a potential indication of a real
+emergency\cite{crywolf}. As false--or 'nuisance'--alarms are
+so common, even when the alarm sounds for a real fire,
+occupants may not evacuate since they don't take the alarm
+seriously.
 
 This performance suggests room for improvment. Machine
 learning-based fire alarms have vastly improved fire alarm
 accuracy, reducing false positives and enabling more
-reliable detection.
-
-\subsection{Motivation}\label{mot}
-
-mot
+reliable detection\cite{ai1}\cite{ai2}\cite{ai3}. However, these approaches overlook the possibility of sensor errors. In real-world scenarios, sensor errors are common and can significantly impact the performance of fire detection systems. By training AlarmNet on a dataset with sensor errors, we aim to develop a model that can maintain high accuracy and recall even in the presence of sensor failures. This would represent a significant advancement in fire detection technology, enhancing the safety and reliability of fire alarm systems in diverse environments.
 
 \section{Approach}
 
@@ -232,9 +233,6 @@ significant improvements. In the training configuration,
 error model to ensure convergence. Using epoch will improve
 based on the device GPU accelerated training on CUDA when
 available, otherwise CPU. 
-
-
-
 
 \subsection{Evaluation Methods}
 \subsubsection{Metrics}
