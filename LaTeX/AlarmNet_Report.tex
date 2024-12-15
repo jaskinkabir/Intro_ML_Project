@@ -84,128 +84,170 @@ Detection, Error Handling, Federated Learning
 \end{IEEEkeywords}
 
 \section{Introduction and Motivation}\label{intro} 
-\subsection{Introduction}
 
 Fire alarm systems play a critical role in safeguarding
 lives and property by providing early warnings of fire
-hazards. Traditional systems, however, often rely on one or
-two sensors with limited detection capabilities. These
-systems are highly susceptible to sensor failures, which can
-render them ineffective and pose significant safety risks.
-In addition, the prevalence of false alarms reduces their
-reliability and can lead to complacency or unnecessary
-emergency responses. While artificial intelligence
-(AI)-based fire detectors have demonstrated significant
-improvements in performance over traditional systems, they
-generally rely on error-free sensor data. This limits their
-practical applicability, especially in real-world scenarios
-where sensor errors and failures are common.
+hazards. Traditional systems, however, do not perform as
+well as their critical role would suggest. For example, a
+2013 study found the Honeywell FS90, a widely used
+commercial fire detection system, only achieves an accuracy
+of 87.5\%\cite{smokeacc}. This contributes to deaths,
+injuries, and damage due to fires in two ways. (1) When a
+fire occurs and the fire detection system fails to recognize
+it, the occupants of the building can only react to the fire
+once they are close enough to observe it, often once it is
+too late to evacuate. (2) A 1995 report stated that fewer
+than 25\% of people interpreted the sound of the fire alarm
+as a potential indication of a real emergency\cite{crywolf}.
+Due to the high frequency of false or 'nuisance' alarms,
+occupants may not evacuate or contact emergency services,
+even if the alarm is triggered by a real fire.
 
-To address these challenges, we propose AlarmNet, a robust
+As these systems typically rely on just one or two sensors
+and simple logic to detect fires, they are especially
+susceptible to faulty sensors rendering them completely
+ineffective. While artificial intelligence (AI)-based fire
+detectors have demonstrated significant improvements in
+accuracy over traditional systems, they generally rely on
+error-free sensor data\cite{ai1}\cite{ai2}\cite{ai3}. This
+limits their practical applicability, especially in
+real-world scenarios wherein sensor errors and failures are
+common.
+
+To address these challenges, we propose AlarmNet, a robust,
 AI-based fire detection system specifically engineered to
 remain accurate in the presence of sensor errors. AlarmNet
 is trained on a dataset from which randomly selected
-measurements were removed. This approach enables the model
-to learn to detect fires accurately based on an arbitrary
-selection of the sensors it has available. The system is
-evaluated in two configurations: a centralized model trained
-on a single server and a simulation of a federated model,
-where training is distributed across multiple clients and
-aggregated into a global model. This dual approach allows us
-to investigate two key questions: (1) whether it is possible
-to train a model that can handle sensor errors, and (2)
-whether a federated model can achieve comparable performance
-while utilizing fewer computational resources. If the
-federated model meets this goal, it would demonstrate AlarmNet's viability as a real-world fire detection system. This paper first details the analysis and preparation of the chosen dataset, followed by a disussion of the design, implementation, and evaluation of both versions of AlarmNet.
+measurements were removed to simulate missing or faulty
+sensor readings. This approach enables the model to learn to
+detect fires accurately based on unreliable sensor data. 
 
-
-\subsection{Motivation}\label{mot}
-
-A 2013 study found the Honeywell FS90, a widely used
-commercial fire detection system, only achieves an accuracy
-of 87.5\%\cite{smokeacc}. This contributes to deaths,
-injuries, and damage due to fires in two ways: Firstly when
-a fire occurs and the fire detection system fails to
-recognize it, the occupants of the building can only react
-to the fire once they are close enough observe it. This
-often means it is too late to evacuate. Secondly, a 1995
-report stated that fewer than 25\% of residents of mid-rise
-residential buildings interpreted the sound of the fire
-alarm as a potential indication of a real
-emergency\cite{crywolf}. As false--or 'nuisance'--alarms are
-so common, even when the alarm sounds for a real fire,
-occupants may not evacuate since they don't take the alarm
-seriously.
-
-This performance suggests room for improvment. Machine
-learning-based fire alarms have vastly improved fire alarm
-accuracy, reducing false positives and enabling more
-reliable detection\cite{ai1}\cite{ai2}\cite{ai3}. However, these approaches overlook the possibility of sensor errors. In real-world scenarios, sensor errors are common and can significantly impact the performance of fire detection systems. By training AlarmNet on a dataset with sensor errors, we aim to develop a model that can maintain high accuracy and recall even in the presence of sensor failures. This would represent a significant advancement in fire detection technology, enhancing the safety and reliability of fire alarm systems in diverse environments.
+The system is evaluated in two configurations: a centralized
+model trained on a single server and a simulation of a
+federated model, where training is distributed across
+multiple clients and aggregated into a global model. This
+dual approach allows us to investigate two key questions:
+(1) whether it is possible to train a model that can handle
+sensor errors, and (2) whether a federated model can achieve
+comparable performance while utilizing fewer computational
+resources. If the federated model meets this goal, it would
+demonstrate AlarmNet's viability as a real-world fire
+detection system. This paper first details the analysis and
+preparation of the chosen dataset, followed by a disussion
+of the design, implementation, and evaluation of both
+versions of AlarmNet.
 
 \section{Approach}
 
 \section{Dataset and Training Setup}
-\subsection{Dataset}
+\section{Dataset}
 The dataset used in this project is the Smoke Detection
-Dataset provided by Stefan Blattmann. The dataset consists
-of approximately 62,629 sensor readings encompassing both
-normal and fire-related scenarios, providing diverse
-training and evaluating fire detection models.
+Dataset provided by Stefan Blattmann\cite{dataset}. The
+dataset consists of approximately 62,629 sensor readings
+encompassing both normal and fire-related scenarios,
+providing diverse training and evaluating fire detection
+models.
 
-\subsubsection{Data Preparation}
-
-
+To generate this data, Blattman constructed an
+Arduiono-based system to collect data from an array of six
+sensors at a 1Hz sampling rate. These sensors were:
 \begin{itemize}
-\item Data Features: Environmental features such as
-temperature, humidity, and pressure, with particulate matter
-readings such as PM1.0, PM2.5, NC0.5, NC1.0, and NC2.5
-measuring air quality sensors. 
-\item Gas Sensor Outputs: TVOC ( Total Volatile Organic
-Compounds)  indicates the presence of volatile organic
-compounds in combustion. eCO2 contains high CO2
-concentration often indicating fire activities. Raw H2 and
-Raw Ethanol are outputs from chemical sensors detecting
-hydrogen and ethanol which are released during certain types
-of fires.  
-\item Handling Sensor Errors: Simulates sensor malfunctions
-to evaluate error-handling capabilities. Including
-thresholds to identify invalid readings and imputed missing
-values within the median or mean imputation. 
-\item Correlation: Analysis to rank features by importance
-reduction from 12 features to 4 key features, humidity, Raw
-Ethanol, Pressure, and TVOC. Additionally, PM0.5 for sensor
-redundancy, resulting in a 5-feature model.
-
-\subsubsection{Feature Selection}
-The smoke detection system was crucial in developing an
-efficient and robust model. Starting with 15 initial
-features, only 12 were unable features, after removing
-non-informative columns such as UTC Timestamps, CNT, and
-Unnamed :0. Optimizing the model's performance and reducing
-computational complexity, tests were conducted such as
-correlation analysis, ranking features based on their
-absolute correlation with 'Fire Alarm" target variables.
-This test led to a significant reduction in the feature set
-in a compact yet highly effective 5-feature model that
-maintained excellent performance within sensor redundancy
-and avoided overfitting. 
-\item Correlation Analysis Methodology: it utilized absolute
-correlation values with 'Fire Alarm' as the target variable.
-It uses ranking features based on the strength to get rid of
-the non-use features, such as TVOC, PM2.5, and NC1.0 show
-strong correlations with the presence of fire. 
-\item Dimensionality Reduction: The feature set from 12 to 4
-key features significantly lowers model complexity. It also
-demonstrated the trade-off between performance and
-simplicity, by removing 8 features with minimal impact. 
-\item Sensor Redundancy: Adding the PM0.5 as the fifth
-feature represented all four sensors which explains the
-importance of maintaining sensor diversity for robustness
-thus approaching the creation of a balance model capturing
-key patterns while avoiding overfitting. 
+    \item Bosch BMP390: Pressure Sensor
+    \item Bosch BME688: Humidity, Temperature, and Gas
+    Sensor (Volatile Organic Compounds/VOC)
+    \item Bosch BMP388: Pressure Sensor
+    \item Sensirion SPS30: Particular Matter Sensor
+    \item Sensirion SHT31: Humidity and Temperature Sensor
+    \item Sensirion SPG30: Gas sensor (VOC)
 \end{itemize}
+Note that several sensors measure the same environmental
+factors, such as humidity and pressure. This redundancy is
+intentional and serves to enhance the robustness of the
+model. Before uploading this dataset to Kaggle, Blattman
+utilized sensor fusion to combine the data from these six
+sensors into a single dataset. The only sensor with no
+redundancy is the Sensirion SPS30, which measures
+particulate matter and is the most expensive sensor.
+
+Blattman placed his sensor array into various fire scenarios and recorded the measurements. He provided the following short list of scenarios during which he collected data:
+\begin{itemize}
+    \item Normal indoor
+    \item Normal outdoor
+    \item Indoor wood fire, firefighter training area
+    \item Indoor gas fire, firefighter training area
+    \item Outdoor wood, coal, and gas grill
+    \item Outdoor high humidity
+    \item etc.
+\end{itemize}
+\cite{Blattmann}
+
+\subsection{Feature Elimination}
+The dataset provided by Blattman originally included 15 features, which are listed in Table \ref{tab:features}. Of these 15, the two sample count features and the timestamp were removed as they do not provide any useful information for the model. Of the remaining 12 features, a crucial task was to determine which features were the most relevant to the target variable. Eliminating irrelevant variables reduces the complexity and computational cost of the model, as its input space shrinks in dimensionality. This reduction can also help prevent overfitting, as the model is less likely to learn noise in the data.
+
+\begin{table}[ht]
+    \begingroup
+    \renewcommand{\arraystretch}{1.5} % 
+    \begin{tabular}{|p{0.25\linewidth}|p{0.65\linewidth}|}
+        \hline
+        \textbf{Feature} & \textbf{Description} \\
+        \hline
+        Timestamp & UTC Timestamp of the sample \\
+        \hline
+        Number & Unique identifier for each sample \\
+        \hline
+        Unnamed: 0 & Unintended duplicate of Number \\
+        \hline
+        Temperature & Air temperature in degrees Celsius \\
+        \hline
+        Humidity & Air humidity in percentage \\
+        \hline
+        Pressure & Air pressure in hectoPascals \\
+        \hline
+        TVOC & Total Volatile Organic Compounds in parts per billion \\
+        \hline
+        eC02 & Carbon Dioxide in parts per million \\
+        \hline
+        Raw H2 & Raw, uncompensated molecular hydrogen \\
+        \hline
+        Raw Ethanol & Raw, uncompensated ethanol \\
+        \hline
+        PM1.0 & Percentage of particles in the air less than 1.0$\mu m$ in diameter \\
+        \hline
+        PM2.5 & Percentage of particles in the air less than 2.5$\mu m$ in diameter \\
+        \hline
+        NC0.5 & Number concentration of particles in the air greater than 0.5$\mu m$ in diameter \\
+        \hline
+        NC1.0 & Number concentration of particles in the air greater than 1.0$\mu m$ in diameter \\
+        \hline
+        NC2.5 & Number concentration of particles in the air greater than 2.5$\mu m$ in diameter \\
+        \hline
+    \end{tabular}
+    \vspace{1pt}
+    \caption{Smoke Detection Dataset Features}
+    \label{tab:features}
+    \endgroup
+\end{table}
+
+To achieve this, we calculated the absolute correlation of
+each feature with the target variable, 'Fire Alarm'. The
+features were then ranked based on this correlation, and the
+top four features were selected for the model. This number
+was chosen by incrementally removing the least correlated
+features from the dataset and training a model on the these
+data until a significant drop in accuracy was measured.
+These top four features were:
+\begin{enumerate}
+    \item Humidity
+    \item Raw Ethanol
+    \item Pressure
+    \item TVOC
+\end{enumerate}
+While a sufficiently accurate model could be trained on these data, this list of features does not include any of the particulate matter measurements. If this system were to ignore one of its sensors, it would be significantly less resilient against sensor errors. To address this, we added back the NC0.5 feature to the data, as it is the most correlated with the target variable among the particulate matter measurements.
 
 \subsection{Error Insertion}
+To simulate sensor errors, we developed a method to randomly remove certain measurements from the dataset according to some assumed rate of error. This rate of error represents the chance that a given sensor reading will provide incorrect or missing data during any given sample. We chose to assume this error rate to be 40\%. This is an unrealistically high number, but it is low enough to ensur that the model is not completely useless while still providing a significant challenge. 
+
+Most of the features--with the exception of the particulate matter measurements--were collected using two sensors. To include this redundancy in the simulation, we assumed that both sensors that generate any feature would have to fail simultaneously in order for that feature to be missing for a given a sample. In other words, while 40\% of the particulate matter measurements were removed, only 20\% of the other measurements were removed.
 
 \subsection{Model Architecture}
 The model implemented a custom deep neural network
