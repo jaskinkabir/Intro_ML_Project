@@ -429,7 +429,30 @@ global model. The global model then averaged these weights
 to create a new global model.
 
 \subsection{Training}
+\subsubsection{Network Classes}
+To train these models, we used the PyTorch library to develop the \texttt{AlarmNet} class. This class has a configurable number and size of hidden layers so that a new class doesn't have to be written for each network configuration. The class also includes methods to train the model, evaluate its performance, and generate visualizations of the model's performance. The class was then used to train the models on the training data and evaluate their performance on the test data.
 
+Additionally, a \texttt{FederatedLearning} class was
+developed to simulate the federated learning system. Upon
+instantiation, this class instantiates a global instance of
+the \texttt{AlarmNet} class. During training, it splits the
+dataset into $n$ parts and then instantiates $n$ copies of
+the global \texttt{AlarmNet} class to represent $n$
+different clients. Each of these classes is then trained on
+a different part of the dataset. After training, the weights
+of each model are  averaged to update the global model. This
+model is then evaluated on the test data to determine its
+performance. $n$ is a configurable parameter, and so are the
+number of training epochs each client trains for and how
+many times this process is repeated.
+\footnote{The code can be found at \url{https://github.com/jaskinkabir/Intro_ML_Project}}
+
+\subsubsection{Training Parameters}
+The models were trained using the Adam optimizer. The loss function used was binary cross-entropy, which is commonly used for binary classification problems. The models trained on the data without inserted errors used a learning rate of $10^{-3}$ and were trained for 3000 epochs. 
+
+To accommodate the error model's larger architecture, the learning rate was reduced to $10^{-5}$ and the model was trained for 16000 epochs. 
+
+The federated model was trained with a learning rate of $10^{-3}$ for the global model and the clients. We chose to simulate three clients, each performing 600 training epochs per round. The process of training the client models for 600 epochs and averaging their weights was repeated 3 times.
 
 \section{Results and Analysis}
 In a comparative analysis, SVM(Support Vector Machine) and
