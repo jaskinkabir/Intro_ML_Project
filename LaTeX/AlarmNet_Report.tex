@@ -11,14 +11,20 @@
 \usepackage{textcomp}
 \usepackage{xcolor}
 \usepackage{placeins}
-% \def\BibTeX{{\rm B\kern-.05em{\sc i\kern-.025em
-%     b}\kern-.08em
-%     T\kern-.1667em\lower.7ex\hbox{E}\kern-.125emX}}
+\usepackage{titlesec}
+
+\setcounter{secnumdepth}{4}
+
+
+
+\def\BibTeX{{\rm B\kern-.05em{\sc i\kern-.025em
+    b}\kern-.08em
+    T\kern-.1667em\lower.7ex\hbox{E}\kern-.125emX}}
 \begin{document}
 
-\title{Fire Detection With Erroneous Input Correction\\
-{\footnotesize \textsuperscript{} ECGR 4105/5105 -
-Introduction to Machine Learning} }
+\title{ Fire Detection With Erroneous Input Correction\\
+        { \footnotesize ECGR 4105/5105 - Introduction to
+            Machine Learning} }
 
 \author{\IEEEauthorblockN{1\textsuperscript{st} Jaskin
 Kabir} \IEEEauthorblockA{\textit{ECGR Student} \\
@@ -40,15 +46,15 @@ mande137@charlotte.edu} }
 \maketitle
 
 \begin{abstract}
-The accuracy of typical fire alarm
-systems is often limited due to their reliance on single
-sensors with constrained detection capabilities. Moreover, a
-sensor failure renders the entire system ineffective, posing
-a critical risk. While AI-based fire detectors have massively outperformed
-traditional systems, little work has addressed handling sensor failures. 
-To address this challenge, we propose \textbf{AlarmNet}, a robust fire
-detection system that incorporates erroneous sensor data
-during training. 
+The accuracy of typical fire alarm systems is often limited
+due to their reliance on single sensors with constrained
+detection capabilities. Moreover, a sensor failure renders
+the entire system ineffective, posing a critical risk. While
+AI-based fire detectors have massively outperformed
+traditional systems, little work has addressed handling
+sensor failures. To address this challenge, we propose
+\textbf{AlarmNet}, a robust fire detection system that
+incorporates erroneous sensor data during training. 
 
 In our experiments, sensor errors were introduced by
 randomly replacing 24.2\% of the dataset’s measurements with
@@ -75,95 +81,76 @@ Network, Imputation, Sensor fusion, Fire Alarms, Fire
 Detection
 \end{IEEEkeywords}
 
-\section{GitHub Repository:}
-\centering
-\url{https://github.com/jaskinkabir/Intro_ML_Project}
+\section{Introduction and Motivation}
+\subsection{Introduction}\label{intro} 
 
-\section{Introduction}
-A 2013 study found the Honeywell FS90, a widely used
-commercial fire detection system, only achieves an accuracy
-of 87.5\%\cite{smokeacc}. This contributes to deaths,
-injuries, and damage due to fires in two ways: Firstly when
-a fire occurs and the fire detection system fails to
-recognize it, the occupants of the building can only react
-to the fire once they are close enough observe it, which
-often means it is too late to evacuate. Secondly, a 1995
-report stated that fewer than 25\% of residents of mid-rise
-residential buildings interpreted the sound of the fire
-alarm as a potential indication of a real
-emergency\cite{crywolf}. As false--or 'nuisance'-- alarms
-are so common, even when a fire alarm sounds for a real
-fire, occupants may not take it seriously and evacuate. This
-is a critical issue
+Fire alarm systems play a critical role in safeguarding
+lives and property by providing early warnings of fire
+hazards. Traditional systems, however, often rely on single
+sensors with limited detection capabilities. These systems
+are highly susceptible to sensor failures, which can render
+them ineffective and pose significant safety risks. In
+addition, the prevalence of false alarms reduces their
+reliability and can lead to complacency or unnecessary
+emergency responses. While artificial intelligence
+(AI)-based fire detectors have demonstrated significant
+improvements in accuracy and performance over traditional
+systems, they generally assume clean, error-free sensor
+data. This assumption limits their practical applicability,
+especially in real-world scenarios where sensor errors and
+failures are common.
 
-In recent years, machine learning has proven to be a robust
-solution to various data problems. Machine Learning is
-particularly apt for analyzing large datasets and creating
-predictive models using advanced statistical models. These
-statistical models allow the program to determine which
-factors or data points are most relevant to a certain
-outcome and make a prediction based on the data it has been
-trained on. There are three main approaches to Machine
-Learning: supervised learning, unsupervised learning, and
-reinforcement learning. Each has its strengths and
-weaknesses. Our project uses supervised learning using the
-Sklearn library in Python. Supervised learning is defined by
-presenting example inputs and desired outputs. The goal is
-to teach the model a general rule that maps these inputs and
-outputs and allows for reliable prediction. However, more
-importantly, our project uses a Neural Network to make
-predictions.
+To address these challenges, we propose AlarmNet, a robust
+AI-based fire detection system designed to handle sensor
+errors effectively. AlarmNet is trained on a dataset from which
+randomly selecteded measurements were removed. This approach
+enables the model to learn to detect fires accurately even
+in the presence of sensor errors. We explore
+two implementations of AlarmNet: a centralized model trained
+on a single server and a federated model where training is
+distributed across multiple clients and aggregated into a
+global model. This dual approach ensures scalability and
+flexibility while maintaining high detection accuracy. In
+this paper, we detail the design, implementation, and
+evaluation of AlarmNet, demonstrating its effectiveness in
+handling real-world sensor failures. A 2013 study found the
+Honeywell FS90, a widely used commercial fire detection
+system, only achieves an accuracy of 87.5\%\cite{smokeacc}.
+This contributes to deaths, injuries, and damage due to
+fires in two ways: Firstly when a fire occurs and the fire
+detection system fails to recognize it, the occupants of the
+building can only react to the fire once they are close
+enough observe it, which often means it is too late to
+evacuate. Secondly, a 1995 report stated that fewer than
+25\% of residents of mid-rise residential buildings
+interpreted the sound of the fire alarm as a potential
+indication of a real emergency\cite{crywolf}. As false--or
+'nuisance'--alarms are so common, even when the alarm sounds
+for a real fire, occupants may not evacuate since they won't
+take it seriously.
 
-\section{Ease of Use}
+This performance suggests room for improvment. Machine
+learning-based fire alarms have vastly improved fire alarm
+accuracy, reducing false positives and enabling more
+reliable detection.
 
-\subsection{Maintaining the Integrity of the Specifications}
+\subsection{Motivation}\label{mot}
 
-In machine learning, models are used to solve robust
-problems with a variety of datasets combined with the topic
-'Internet of Things', the development of a fire detection
-model offers significant ease of integrating existing fire
-alarms without any extensive hardware modifications. Sensor
-data is commonly available in modern times, such as stores,
-schools, offices, and industrial facilities. These erroneous
-input models can minimize the setup costs. Furthermore, the
-approach for continuous improvement as additional data
-becomes available ensures the adaptability to various
-environments in fire scenarios. The design model ensures
-both residential and industrial users benefit from fire
-detection without compromising reliability and simplicity.   
+mot
 
-\section{Motivation}
-Sensors are one of the most crucial aspects of modern-day
-technology which helps improve daily lives most particularly
-fire detection. It plays a critical role in public safety
-such as industrial, residential, and public places.
-Traditional systems during effect, often suffer from false
-positives and false negatives which leads to unnecessary
-evacuations or worse, failure to alert real danger. These
-unnecessary issues underscore the need for in-depth research
-of advanced, accurate, and reliable solutions. This project
-builds a bridge by developing a machine-learning model
-capable of predicting fire events based on air condition
-data. Stefan Blattmann's Smoke Detection Dataset contains
-diverse environmental fire events which intend to create a
-system that improves accuracy but also handles sensor
-errors. The potential impact of the model can extend beyond
-the immediate technical systems. Enhanced fire detection
-systems can save lives, reduce damages, and prevent
-disruptions caused by false alarms. This design
-applicability from household safety to the industrial system
-level highlights the value of safety technology. 
+\section{Approach}
+
+\section{Dataset and Training Setup}
+\subsection{Dataset}
+The dataset used in this project is the Smoke Detection
+Dataset provided by Stefan Blattmann. The dataset consists
+of approximately 62,629 sensor readings encompassing both
+normal and fire-related scenarios, providing diverse
+training and evaluating fire detection models.
+
+\subsubsection{Data Preparation}
 
 
-\subsection{Dataset and Preprocessing}\label{AA} The dataset
-used in this project is the Smoke Detection Dataset provided
-by Stefan Blattmann. The dataset consists of approximately
-62,629 sensor readings encompassing both normal and
-fire-related scenarios, providing diverse training and
-evaluating fire detection models.
-
-
-\subsection{Key Features}
 \begin{itemize}
 \item Data Features: Environmental features such as
 temperature, humidity, and pressure, with particulate matter
@@ -185,7 +172,7 @@ reduction from 12 features to 4 key features, humidity, Raw
 Ethanol, Pressure, and TVOC. Additionally, PM0.5 for sensor
 redundancy, resulting in a 5-feature model.
 
-\subsection{Feature Selection}
+\subsubsection{Feature Selection}
 The smoke detection system was crucial in developing an
 efficient and robust model. Starting with 15 initial
 features, only 12 were unable features, after removing
@@ -214,7 +201,9 @@ thus approaching the creation of a balance model capturing
 key patterns while avoiding overfitting. 
 \end{itemize}
 
-\subsection{\-Model Architecture}
+\subsection{Error Insertion}
+
+\subsection{Model Architecture}
 The model implemented a custom deep neural network
 (AlarmNet) for fire detection. The dataset's multivariate
 sensor data balance complexity and efficiency. Input layer
@@ -244,8 +233,8 @@ available, otherwise CPU.
 
 
 
-\subsection{Training and Evaluation}\label{SCM}
-
+\subsection{Evaluation Methods}
+\subsubsection{Metrics}
 \begin{itemize}
 \item Data Splitting: The dataset is split into 80/20
 percent for training/testing to evaluate model performance. 
@@ -281,10 +270,12 @@ that are incorrectly classified as positives
 \item Confusion Matrix: This model visualizes true
 positive/negative and false positive/negatives
 \end{itemize}
+\subsubsection{Honeywell FS90 Simulation}
 
 
 
-\subsection{Error Handling and Robustness}
+\subsection{Model Architecture and Training}
+
 \textbf 
 In the real world sensor data, is often due to hardware
 communication limitations and errors. It can lead to
@@ -345,7 +336,7 @@ different environments. Simulating error handling,
 imputation, and targeted features in correlation highlights
 the model's resilience and practical applications. 
 
-\subsection{Comparative Analysis}
+\section{Results and Analysis}
 In a comparative analysis, SVM(Support Vector Machine) and
 NN (Neural Network) were both considered for fire detection
 within the 12-feature test bench. Neural networks are
@@ -400,7 +391,7 @@ highlighting the potential ANN that can provide for
 enchanting better real-world safety protocols (fig 18 and
 19). 
 
-\subsection{Conclusion}
+\section{Lessons Learned}
 This machine learning model successfully demonstrated the
 development an efficient fire detection system using sensor
 data. By leveraging a custom neural network architecture,
@@ -434,16 +425,33 @@ diverse environments.
 
 
 
-\subsection{Contributions}
-\textbf{Matthew Anderson:} Worked on Federated Learn Class
+\section{Contributions}
+\begin{itemize}
+\item\textbf{Matthew Anderson:} 
+\begin{itemize}
+    \item Federated Learning Class
+    \item Edited Report and Presentation
+\end{itemize}
 
-\textbf{Jaskin Kabir:} Worked on AlarmNet class that
-contains Neural Network Model
+\item\textbf{Jaskin Kabir:} 
+\begin{itemize}
+    \item Project Manager
+    \item Dataset Selection, Preparation, and Analysis
+    \item AlarmNet Class that contained the fully connected
+    model
+    \item Error insertion and imputation
+    \item Edited Report and Presentation
+\end{itemize}
 
-\textbf{Axel Leon Vasquez:} Wrote Presentation/Report,
-worked on debugging and visualization
-
+\item\textbf{Axel Leon Vasquez:} 
+\begin{itemize}
+    \item Wrote Report
+    \item Created Presentation
+    \item Data Visualization
+\end{itemize}
+\end{itemize}
 \subsection{References}
+
 \bibliographystyle{IEEEtran}
 \bibliography{refs.bib}
 
