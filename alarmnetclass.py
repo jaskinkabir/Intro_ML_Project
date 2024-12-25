@@ -4,7 +4,6 @@ import torch.nn.functional as F
 import numpy as np
 from sklearn.metrics import accuracy_score, precision_score, recall_score, f1_score, confusion_matrix, classification_report, ConfusionMatrixDisplay
 from torch.amp import autocast, GradScaler
-<<<<<<< HEAD
 #import svm 
 from sklearn.svm import SVC
 
@@ -12,9 +11,6 @@ import matplotlib.pyplot as plt
 import time
 
 
-=======
-import time
->>>>>>> 69a636f13597b7e0c86ac8ee32dd9833ef1f9540
 
 class AlarmNet(nn.Module):
 

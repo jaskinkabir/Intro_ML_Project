@@ -145,7 +145,7 @@ class FederatedLearning:
     def plot_confusion_matrix(self, cm, title):
         plt.figure(figsize=(6, 5))
         plt.title(title)
-        sns.heatmap(cm, annot=True, fmt='d', cmap='Reds', xticklabels=['No Fire', 'Fire'], yticklabels=['No Fire', 'Fire'])
+        # sns.heatmap(cm, annot=True, fmt='d', cmap='Reds', xticklabels=['No Fire', 'Fire'], yticklabels=['No Fire', 'Fire']) # Dont think this is super helpful
         plt.xlabel('Predicted')
         plt.ylabel('True')
         plt.show()
