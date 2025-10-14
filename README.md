@@ -1,0 +1,1 @@
+A fully connected neural network for smart fire alarm systems that uses imputation to correct for erroneous sensor input data. The full report can be read [here.](https://github.com/jaskinkabir/Intro_ML_Project/blob/3edcdfde52cdb90554af6c7ad06e548312897706/LaTeX/AlarmNet_Report.pdf)
